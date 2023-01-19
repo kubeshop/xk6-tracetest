@@ -1,0 +1,8 @@
+.idea
+examples/k6
+k6
+k6-tracetest
+vendor
+gen
+.DS_Store
+tracetest.json
