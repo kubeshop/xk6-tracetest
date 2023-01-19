@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/kubeshop/tracetest/extensions/k6/openapi"
+	"github.com/kubeshop/xk6-tracetest/openapi"
 )
 
 type JobType string

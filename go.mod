@@ -1,4 +1,4 @@
-module github.com/kubeshop/tracetest/extensions/k6
+module github.com/kubeshop/xk6-tracetest
 
 go 1.18
 

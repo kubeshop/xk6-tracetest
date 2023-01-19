@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kubeshop/tracetest/extensions/k6/models"
-	"github.com/kubeshop/tracetest/extensions/k6/openapi"
+	"github.com/kubeshop/xk6-tracetest/models"
+	"github.com/kubeshop/xk6-tracetest/openapi"
 )
 
 func NewAPIClient(options Options) *openapi.APIClient {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dop251/goja"
-	"github.com/kubeshop/tracetest/extensions/k6/utils"
+	"github.com/kubeshop/xk6-tracetest/utils"
 	"go.k6.io/k6/js/modules"
 )
 

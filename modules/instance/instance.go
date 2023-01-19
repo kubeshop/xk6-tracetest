@@ -1,8 +1,8 @@
 package instance
 
 import (
-	"github.com/kubeshop/tracetest/extensions/k6/modules/httpClient"
-	"github.com/kubeshop/tracetest/extensions/k6/modules/tracetest"
+	"github.com/kubeshop/xk6-tracetest/modules/httpClient"
+	"github.com/kubeshop/xk6-tracetest/modules/tracetest"
 	"go.k6.io/k6/js/modules"
 )
 

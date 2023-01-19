@@ -20,7 +20,7 @@ jobs:
         run: go install go.k6.io/xk6/cmd/xk6@latest
 
       - name: Build the binary
-        run: xk6 build --with github.com/kubeshop/tracetest/extensions/k6=.
+        run: xk6 build --with github.com/kubeshop/xk6-tracetest=.
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2

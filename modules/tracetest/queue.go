@@ -3,7 +3,7 @@ package tracetest
 import (
 	"sync"
 
-	"github.com/kubeshop/tracetest/extensions/k6/models"
+	"github.com/kubeshop/xk6-tracetest/models"
 )
 
 func (t *Tracetest) processQueue() {

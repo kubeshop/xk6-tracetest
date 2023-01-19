@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/kubeshop/tracetest/extensions/k6/utils"
+	"github.com/kubeshop/xk6-tracetest/utils"
 	"go.opentelemetry.io/contrib/propagators/aws/xray"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/contrib/propagators/jaeger"

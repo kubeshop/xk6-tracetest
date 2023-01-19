@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
-	"github.com/kubeshop/tracetest/extensions/k6/models"
-	"github.com/kubeshop/tracetest/extensions/k6/utils"
+	"github.com/kubeshop/xk6-tracetest/models"
+	"github.com/kubeshop/xk6-tracetest/utils"
 	"go.k6.io/k6/lib"
 	"go.k6.io/k6/metrics"
 )
