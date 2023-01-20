@@ -19,6 +19,7 @@ func (o *Output) handleSample(sample metrics.SampleContainer) {
 func (o *Output) handleHttpSample(trail *httpext.Trail) {
 	traceID, hasTrace := trail.Metadata["trace_id"]
 	testID, hasTestID := trail.Metadata["test_id"]
+	variableName, _ := trail.Metadata["variable_name"]
 	_, hasShouldWait := trail.Metadata["should_wait"]
 
 	if !hasTrace || !hasTestID {
@@ -59,7 +60,13 @@ func (o *Output) handleHttpSample(trail *httpext.Trail) {
 		Metadata: metadata,
 	}
 
+	options := models.TracetestOptions{
+		VariableName: variableName,
+		TestID:       testID,
+		ShouldWait:   hasShouldWait,
+	}
+
 	if hasTestID {
-		o.tracetest.RunTest(testID, traceID, hasShouldWait, request)
+		o.tracetest.RunTest(traceID, options, request)
 	}
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/kubeshop/xk6-tracetest/openapi"
 )
 
-func NewAPIClient(options Options) *openapi.APIClient {
+func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	url, err := url.Parse(options.ServerUrl)
 
 	if err != nil {
@@ -33,15 +33,14 @@ func NewAPIClient(options Options) *openapi.APIClient {
 	return openapi.NewAPIClient(config)
 }
 
-func (t *Tracetest) runTest(testID, traceId string, metadata models.Metadata) (*openapi.TestRun, error) {
-	request := t.client.ApiApi.RunTest(context.Background(), testID)
-	key := "TRACE_ID"
+func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
+	request := t.client.ApiApi.RunTest(context.Background(), job.TestID)
 	request = request.RunInformation(openapi.RunInformation{
 		Variables: []openapi.EnvironmentValue{{
-			Key:   &key,
-			Value: &traceId,
+			Key:   &job.TracetestOptions.VariableName,
+			Value: &job.TraceID,
 		}},
-		Metadata: metadata,
+		Metadata: job.Request.Metadata,
 	})
 
 	run, _, err := t.client.ApiApi.RunTestExecute(request)
@@ -112,10 +111,10 @@ func (t *Tracetest) stringSummary() string {
 		if job, ok := value.(models.Job); ok {
 			totalRuns += 1
 			if job.IsSuccessful() {
-				successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(t.options.ServerUrl))
+				successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
 				successfulRuns += 1
 			} else {
-				failedSummary += fmt.Sprintf("[%s] \n", job.Summary(t.options.ServerUrl))
+				failedSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
 				failedRuns += 1
 			}
 		}

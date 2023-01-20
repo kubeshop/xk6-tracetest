@@ -1,52 +1,45 @@
+import { check } from 'k6';
 import { Http, Tracetest } from "k6/x/tracetest";
 import { sleep } from "k6";
 
 export const options = {
   vus: 1,
-  duration: "5s",
+  duration: "6s",
 };
 
-const http = new Http();
 const tracetest = Tracetest({
   serverUrl: "http://localhost:3000",
 });
-const testId = "J0d887oVR";
+const testId = "kc_MgKoVR";
+const pokemonId = 6;
+const http = new Http();
 
 export default function () {
-  /// successful test run
-  http.get("http://localhost:8081/pokemon?take=5", {
+  const url = "http://localhost:8081/pokemon/import";
+  const payload = JSON.stringify({
+    id: pokemonId,
+  });
+  const params = {
     tracetest: {
       testId,
     },
-  });
-
-  /// failed test specs test run
-  http.get("http://localhost:8081/pokemon?take=10", {
-    tracetest: {
-      testId: "nDdBCnoVg",
+    headers: {
+      'Content-Type': 'application/json',
     },
+  };
+
+  const response = http.post(url, payload, params);
+
+  check(response, {
+    'is status 200': (r) => r.status === 200,
+    'body matches de id': (r) => JSON.parse(r.body).id === pokemonId,
   });
-
-  /// not existing test
-  // http.get("http://localhost:8081/pokemon?take=10", {
-  //   tracetest: {
-  //     testId: "doesnt-exist",
-  //   },
-  // });
-
-  /// wrong endpoint
-  // http.get("http://localhost:8081/wrong", {
-  //   tracetest: {
-  //     testId: "nDdBCnoVg",
-  //   },
-  // });
-
   sleep(1);
 }
 
-export function handleSummary() {
-  return {
-    stdout: tracetest.summary(),
-    'tracetest.json': tracetest.json(),
-  };
-}
+// export function handleSummary() {
+//   return {
+//     stdout: tracetest.summary(),
+//     "tracetest.json": tracetest.json(),
+//   };
+// }

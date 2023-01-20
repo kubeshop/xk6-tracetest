@@ -22,29 +22,33 @@ const (
 )
 
 type Job struct {
-	TraceID    string
-	TestID     string
-	JobType    JobType
-	Request    Request
-	Run        *TracetestRun
-	JobStatus  JobStatus
-	ShouldWait bool
+	TraceID          string
+	TestID           string
+	VariableName     string
+	JobType          JobType
+	Request          Request
+	Run              *TracetestRun
+	JobStatus        JobStatus
+	TracetestOptions TracetestOptions
+	Error            string
 }
 
-func NewJob(traceID, testID string, jobType JobType, shouldWait bool, request Request) Job {
+func NewJob(traceId string, options TracetestOptions, request Request) Job {
 	return Job{
-		TraceID:    traceID,
-		TestID:     testID,
-		JobType:    jobType,
-		Request:    request,
-		JobStatus:  Pending,
-		ShouldWait: shouldWait,
+		JobType:   RunTestFromId,
+		Request:   request,
+		JobStatus: Pending,
+
+		TraceID:          traceId,
+		TestID:           options.TestID,
+		TracetestOptions: options,
 	}
 }
 
 func (job Job) HandleRunResponse(run *openapi.TestRun, err error) Job {
 	if run == nil {
 		job.JobStatus = Failed
+		job.Error = err.Error()
 	} else {
 		job.JobStatus = Success
 		job.Run = &TracetestRun{
@@ -57,7 +61,7 @@ func (job Job) HandleRunResponse(run *openapi.TestRun, err error) Job {
 }
 
 func (job Job) Summary(baseUrl string) string {
-	runSummary := "JobStatus=" + string(job.JobStatus)
+	runSummary := fmt.Sprintf("JobStatus=%s, Error=%s", string(job.JobStatus), job.Error)
 	if job.Run != nil {
 		runSummary = job.Run.Summary(baseUrl)
 	}

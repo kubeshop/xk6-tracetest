@@ -1,20 +1,23 @@
 package httpClient
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/dop251/goja"
 	"github.com/kubeshop/xk6-tracetest/models"
 	"github.com/kubeshop/xk6-tracetest/utils"
+	k6HTTP "go.k6.io/k6/js/modules/k6/http"
 	"go.k6.io/k6/lib"
 	"go.k6.io/k6/metrics"
 )
 
 const (
-	TraceID    = "trace_id"
-	TestID     = "test_id"
-	ShouldWait = "should_wait"
+	TraceID      = "trace_id"
+	TestID       = "test_id"
+	ShouldWait   = "should_wait"
+	VariableName = "variable_name"
 )
 
 func (c *HttpClient) WithTrace(fn HttpFunc, url goja.Value, args ...goja.Value) (*HTTPResponse, error) {
@@ -72,19 +75,21 @@ func (c *HttpClient) WithTrace(fn HttpFunc, url goja.Value, args ...goja.Value) 
 }
 
 func (c *HttpClient) setTags(rt *goja.Runtime, state *lib.State, traceID string, params *goja.Object) {
-	tracetestOptions := parseTracetestOptions(rt, params)
+	tracetestOptions := models.NewTracetestOptions(rt, params)
 	state.Tags.Modify(func(tagsAndMeta *metrics.TagsAndMeta) {
 		tagsAndMeta.SetMetadata(TraceID, traceID)
 
-		if tracetestOptions.testID != "" {
-			tagsAndMeta.SetMetadata(TestID, tracetestOptions.testID)
-		} else if c.options.Tracetest.testID != "" {
-			tagsAndMeta.SetMetadata(TestID, c.options.Tracetest.testID)
+		if tracetestOptions.TestID != "" {
+			tagsAndMeta.SetMetadata(TestID, tracetestOptions.TestID)
+		} else if c.options.Tracetest.TestID != "" {
+			tagsAndMeta.SetMetadata(TestID, c.options.Tracetest.TestID)
 		}
 
-		if tracetestOptions.shouldWait || c.options.Tracetest.shouldWait {
+		if tracetestOptions.ShouldWait || c.options.Tracetest.ShouldWait {
 			tagsAndMeta.SetMetadata(ShouldWait, "true")
 		}
+
+		tagsAndMeta.SetMetadata(VariableName, tracetestOptions.VariableName)
 	})
 }
 
@@ -93,5 +98,12 @@ func (c *HttpClient) deleteTags(state *lib.State) {
 		tagsAndMeta.DeleteMetadata(TraceID)
 		tagsAndMeta.DeleteMetadata(TestID)
 		tagsAndMeta.DeleteMetadata(ShouldWait)
+		tagsAndMeta.DeleteMetadata(VariableName)
 	})
+}
+
+func requestToHttpFunc(method string, request HttpRequestFunc) HttpFunc {
+	return func(ctx context.Context, url goja.Value, args ...goja.Value) (*k6HTTP.Response, error) {
+		return request(method, url, args...)
+	}
 }

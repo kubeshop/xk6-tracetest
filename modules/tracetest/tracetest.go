@@ -22,7 +22,7 @@ type Tracetest struct {
 	periodicFlusher *output.PeriodicFlusher
 	logger          logrus.FieldLogger
 	client          *openapi.APIClient
-	options         Options
+	apiOptions      models.ApiOptions
 }
 
 func New() *Tracetest {
@@ -31,6 +31,7 @@ func New() *Tracetest {
 		buffer:          []models.Job{},
 		processedBuffer: sync.Map{},
 		logger:          logger.WithField("component", "xk6-tracetest-tracing"),
+		client:          NewAPIClient(models.ApiOptions{}),
 	}
 
 	duration := 1 * time.Second
@@ -42,19 +43,19 @@ func New() *Tracetest {
 
 func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
 	rt := t.Vu.Runtime()
-	options, err := getOptions(t.Vu, call.Argument(0))
+	apiOptions, err := models.NewApiOptions(t.Vu, call.Argument(0))
 	if err != nil {
 		common.Throw(rt, err)
 	}
 
-	t.options = options
-	t.client = NewAPIClient(options)
+	t.apiOptions = apiOptions
+	t.client = NewAPIClient(apiOptions)
 
 	return rt.ToValue(t).ToObject(rt)
 }
 
-func (t *Tracetest) RunTest(testID, traceID string, shouldWait bool, request models.Request) {
-	t.queueJob(models.NewJob(traceID, testID, models.RunTestFromId, shouldWait, request))
+func (t *Tracetest) RunTest(traceID string, options models.TracetestOptions, request models.Request) {
+	t.queueJob(models.NewJob(traceID, options, request))
 }
 
 func (t *Tracetest) Summary() string {

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dop251/goja"
+	"github.com/kubeshop/xk6-tracetest/models"
 	"go.k6.io/k6/js/common"
 	"go.k6.io/k6/js/modules"
 	k6HTTP "go.k6.io/k6/js/modules/k6/http"
@@ -14,7 +15,7 @@ type HttpClient struct {
 	vu          modules.VU
 	httpRequest HttpRequestFunc
 
-	options Options
+	options models.HttpClientOptions
 }
 
 type HTTPResponse struct {
@@ -46,7 +47,7 @@ func New(vu modules.VU) *HttpClient {
 
 func (h *HttpClient) Constructor(call goja.ConstructorCall) *goja.Object {
 	rt := h.vu.Runtime()
-	options, err := getOptions(h.vu, call.Argument(0))
+	options, err := models.NewHttpClientOptions(h.vu, call.Argument(0))
 	if err != nil {
 		common.Throw(rt, err)
 	}

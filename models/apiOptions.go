@@ -1,4 +1,4 @@
-package tracetest
+package models
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"go.k6.io/k6/js/modules"
 )
 
-type Options struct {
+type ApiOptions struct {
 	ServerUrl  string
 	ServerPath string
 }
@@ -19,9 +19,9 @@ const (
 	ServerPath       = "serverPath"
 )
 
-func getOptions(vu modules.VU, val goja.Value) (Options, error) {
+func NewApiOptions(vu modules.VU, val goja.Value) (ApiOptions, error) {
 	rawOptions := utils.ParseOptions(vu, val)
-	options := Options{
+	options := ApiOptions{
 		ServerUrl:  DefaultServerUrl,
 		ServerPath: "",
 	}
