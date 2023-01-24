@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/kubeshop/xk6-tracetest/models"
 	"github.com/kubeshop/xk6-tracetest/modules/tracetest"
 	"github.com/sirupsen/logrus"
 
@@ -12,7 +13,7 @@ import (
 )
 
 type Output struct {
-	config    Config
+	config    models.OutputConfig
 	testRunID int64
 	logger    logrus.FieldLogger
 	tracetest *tracetest.Tracetest
@@ -21,10 +22,12 @@ type Output struct {
 var _ output.Output = new(Output)
 
 func New(params output.Params, tracetest *tracetest.Tracetest) (*Output, error) {
-	config, err := NewConfig(params)
+	config, err := models.NewConfig(params)
 	if err != nil {
 		return nil, err
 	}
+
+	tracetest.UpdateFromConfig(config)
 
 	return &Output{
 		config:    config,

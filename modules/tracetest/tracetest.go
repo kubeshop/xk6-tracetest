@@ -2,6 +2,7 @@ package tracetest
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -41,6 +42,15 @@ func New() *Tracetest {
 	return tracetest
 }
 
+func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
+	apiOptions := models.ApiOptions{
+		ServerUrl:  config.ServerUrl,
+		ServerPath: config.ServerPath,
+	}
+
+	t.client = NewAPIClient(apiOptions)
+}
+
 func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
 	rt := t.Vu.Runtime()
 	apiOptions, err := models.NewApiOptions(t.Vu, call.Argument(0))
@@ -64,6 +74,18 @@ func (t *Tracetest) Summary() string {
 	}
 
 	return t.stringSummary()
+}
+
+func (t *Tracetest) ValidateResult() {
+	if len(t.buffer) != 0 {
+		t.processQueue()
+	}
+
+	_, failedJobs := t.jobSummary()
+
+	if len(failedJobs) > 0 {
+		panic(fmt.Sprintf("Tracetest: %d jobs failed", len(failedJobs)))
+	}
 }
 
 func (t *Tracetest) Json() string {

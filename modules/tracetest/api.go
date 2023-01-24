@@ -100,27 +100,37 @@ func (t *Tracetest) getIsTestReady(ctx context.Context, testID, testRunId string
 	return nil, nil
 }
 
-func (t *Tracetest) stringSummary() string {
-	failedSummary := "[FAILED] \n"
-	successfulSummary := "[SUCCESSFUL] \n"
-	totalRuns := 0
-	failedRuns := 0
-	successfulRuns := 0
-
+func (t *Tracetest) jobSummary() (successfulJobs, failedJobs []models.Job) {
 	t.processedBuffer.Range(func(_, value interface{}) bool {
 		if job, ok := value.(models.Job); ok {
-			totalRuns += 1
 			if job.IsSuccessful() {
-				successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
-				successfulRuns += 1
+				successfulJobs = append(successfulJobs, job)
 			} else {
-				failedSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
-				failedRuns += 1
+				failedJobs = append(failedJobs, job)
 			}
 		}
 
 		return true
 	})
+
+	return
+}
+
+func (t *Tracetest) stringSummary() string {
+	successfulJobs, failedJobs := t.jobSummary()
+	failedSummary := "[FAILED] \n"
+	successfulSummary := "[SUCCESSFUL] \n"
+	totalRuns := len(successfulJobs) + len(failedJobs)
+	failedRuns := len(failedJobs)
+	successfulRuns := len(successfulJobs)
+
+	for _, job := range failedJobs {
+		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
+	}
+
+	for _, job := range successfulJobs {
+		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
+	}
 
 	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", totalRuns, successfulRuns, failedRuns)
 
