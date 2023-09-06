@@ -24,6 +24,7 @@ type Tracetest struct {
 	logger          logrus.FieldLogger
 	client          *openapi.APIClient
 	apiOptions      models.ApiOptions
+	mutex           sync.Mutex
 }
 
 func New() *Tracetest {
@@ -33,6 +34,7 @@ func New() *Tracetest {
 		processedBuffer: sync.Map{},
 		logger:          logger.WithField("component", "xk6-tracetest-tracing"),
 		client:          NewAPIClient(models.ApiOptions{}),
+		mutex:           sync.Mutex{},
 	}
 
 	duration := 1 * time.Second
@@ -52,6 +54,9 @@ func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
 }
 
 func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
 	rt := t.Vu.Runtime()
 	apiOptions, err := models.NewApiOptions(t.Vu, call.Argument(0))
 	if err != nil {
