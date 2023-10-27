@@ -11,12 +11,14 @@ import (
 type ApiOptions struct {
 	ServerUrl  string
 	ServerPath string
+	APIToken   string
 }
 
 const (
 	DefaultServerUrl = "http://localhost:3000"
 	ServerURL        = "serverUrl"
 	ServerPath       = "serverPath"
+	APIToken         = "apiToken"
 )
 
 func NewApiOptions(vu modules.VU, val goja.Value) (ApiOptions, error) {
@@ -24,6 +26,7 @@ func NewApiOptions(vu modules.VU, val goja.Value) (ApiOptions, error) {
 	options := ApiOptions{
 		ServerUrl:  DefaultServerUrl,
 		ServerPath: "",
+		APIToken:   "",
 	}
 
 	if len(rawOptions) == 0 {
@@ -36,6 +39,8 @@ func NewApiOptions(vu modules.VU, val goja.Value) (ApiOptions, error) {
 			options.ServerUrl = value.ToString().String()
 		case ServerPath:
 			options.ServerPath = value.ToString().String()
+		case APIToken:
+			options.APIToken = value.ToString().String()
 		default:
 			return options, fmt.Errorf("unknown Tracetest option '%s'", key)
 		}

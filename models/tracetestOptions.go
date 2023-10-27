@@ -1,6 +1,8 @@
 package models
 
-import "github.com/dop251/goja"
+import (
+	"github.com/dop251/goja"
+)
 
 type TracetestOptions struct {
 	TestID       string

@@ -2,7 +2,10 @@ package tracetest
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -22,6 +25,14 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	config.Host = url.Host
 	config.Scheme = url.Scheme
 
+	if options.APIToken != "" {
+		jwt, err := getJWTFromToken(url, options.APIToken)
+		if err != nil {
+			panic(err)
+		}
+		config.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", jwt))
+	}
+
 	if options.ServerPath != "" {
 		config.Servers = []openapi.ServerConfiguration{
 			{
@@ -31,6 +42,39 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	}
 
 	return openapi.NewAPIClient(config)
+}
+
+func getJWTFromToken(url *url.URL, token string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/tokens/%s/exchange", url.Scheme, url.Host, token), nil)
+	if err != nil {
+		return "", fmt.Errorf("could not create request for token exchange: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send request for token exchange: %w", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		// Probably an OS version of tracetest
+		return "", fmt.Errorf("tracetest server doesn't support API Tokens")
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("could not read body from response: %w", err)
+	}
+
+	respJson := struct {
+		JWT string `json:"jwt"`
+	}{}
+
+	err = json.Unmarshal(respBody, &respJson)
+	if err != nil {
+		return "", fmt.Errorf("could not unmarshal response body: %w", err)
+	}
+
+	return respJson.JWT, nil
 }
 
 func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
