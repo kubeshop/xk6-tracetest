@@ -14,11 +14,15 @@ import (
 	"encoding/json"
 )
 
+// checks if the TriggerResultTriggerResult type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &TriggerResultTriggerResult{}
+
 // TriggerResultTriggerResult struct for TriggerResultTriggerResult
 type TriggerResultTriggerResult struct {
 	Http    *HTTPResponse    `json:"http,omitempty"`
 	Grpc    *GRPCResponse    `json:"grpc,omitempty"`
 	Traceid *TRACEIDResponse `json:"traceid,omitempty"`
+	Kafka   *KafkaResponse   `json:"kafka,omitempty"`
 }
 
 // NewTriggerResultTriggerResult instantiates a new TriggerResultTriggerResult object
@@ -40,7 +44,7 @@ func NewTriggerResultTriggerResultWithDefaults() *TriggerResultTriggerResult {
 
 // GetHttp returns the Http field value if set, zero value otherwise.
 func (o *TriggerResultTriggerResult) GetHttp() HTTPResponse {
-	if o == nil || o.Http == nil {
+	if o == nil || isNil(o.Http) {
 		var ret HTTPResponse
 		return ret
 	}
@@ -50,7 +54,7 @@ func (o *TriggerResultTriggerResult) GetHttp() HTTPResponse {
 // GetHttpOk returns a tuple with the Http field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *TriggerResultTriggerResult) GetHttpOk() (*HTTPResponse, bool) {
-	if o == nil || o.Http == nil {
+	if o == nil || isNil(o.Http) {
 		return nil, false
 	}
 	return o.Http, true
@@ -58,7 +62,7 @@ func (o *TriggerResultTriggerResult) GetHttpOk() (*HTTPResponse, bool) {
 
 // HasHttp returns a boolean if a field has been set.
 func (o *TriggerResultTriggerResult) HasHttp() bool {
-	if o != nil && o.Http != nil {
+	if o != nil && !isNil(o.Http) {
 		return true
 	}
 
@@ -72,7 +76,7 @@ func (o *TriggerResultTriggerResult) SetHttp(v HTTPResponse) {
 
 // GetGrpc returns the Grpc field value if set, zero value otherwise.
 func (o *TriggerResultTriggerResult) GetGrpc() GRPCResponse {
-	if o == nil || o.Grpc == nil {
+	if o == nil || isNil(o.Grpc) {
 		var ret GRPCResponse
 		return ret
 	}
@@ -82,7 +86,7 @@ func (o *TriggerResultTriggerResult) GetGrpc() GRPCResponse {
 // GetGrpcOk returns a tuple with the Grpc field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *TriggerResultTriggerResult) GetGrpcOk() (*GRPCResponse, bool) {
-	if o == nil || o.Grpc == nil {
+	if o == nil || isNil(o.Grpc) {
 		return nil, false
 	}
 	return o.Grpc, true
@@ -90,7 +94,7 @@ func (o *TriggerResultTriggerResult) GetGrpcOk() (*GRPCResponse, bool) {
 
 // HasGrpc returns a boolean if a field has been set.
 func (o *TriggerResultTriggerResult) HasGrpc() bool {
-	if o != nil && o.Grpc != nil {
+	if o != nil && !isNil(o.Grpc) {
 		return true
 	}
 
@@ -104,7 +108,7 @@ func (o *TriggerResultTriggerResult) SetGrpc(v GRPCResponse) {
 
 // GetTraceid returns the Traceid field value if set, zero value otherwise.
 func (o *TriggerResultTriggerResult) GetTraceid() TRACEIDResponse {
-	if o == nil || o.Traceid == nil {
+	if o == nil || isNil(o.Traceid) {
 		var ret TRACEIDResponse
 		return ret
 	}
@@ -114,7 +118,7 @@ func (o *TriggerResultTriggerResult) GetTraceid() TRACEIDResponse {
 // GetTraceidOk returns a tuple with the Traceid field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *TriggerResultTriggerResult) GetTraceidOk() (*TRACEIDResponse, bool) {
-	if o == nil || o.Traceid == nil {
+	if o == nil || isNil(o.Traceid) {
 		return nil, false
 	}
 	return o.Traceid, true
@@ -122,7 +126,7 @@ func (o *TriggerResultTriggerResult) GetTraceidOk() (*TRACEIDResponse, bool) {
 
 // HasTraceid returns a boolean if a field has been set.
 func (o *TriggerResultTriggerResult) HasTraceid() bool {
-	if o != nil && o.Traceid != nil {
+	if o != nil && !isNil(o.Traceid) {
 		return true
 	}
 
@@ -134,18 +138,61 @@ func (o *TriggerResultTriggerResult) SetTraceid(v TRACEIDResponse) {
 	o.Traceid = &v
 }
 
+// GetKafka returns the Kafka field value if set, zero value otherwise.
+func (o *TriggerResultTriggerResult) GetKafka() KafkaResponse {
+	if o == nil || isNil(o.Kafka) {
+		var ret KafkaResponse
+		return ret
+	}
+	return *o.Kafka
+}
+
+// GetKafkaOk returns a tuple with the Kafka field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TriggerResultTriggerResult) GetKafkaOk() (*KafkaResponse, bool) {
+	if o == nil || isNil(o.Kafka) {
+		return nil, false
+	}
+	return o.Kafka, true
+}
+
+// HasKafka returns a boolean if a field has been set.
+func (o *TriggerResultTriggerResult) HasKafka() bool {
+	if o != nil && !isNil(o.Kafka) {
+		return true
+	}
+
+	return false
+}
+
+// SetKafka gets a reference to the given KafkaResponse and assigns it to the Kafka field.
+func (o *TriggerResultTriggerResult) SetKafka(v KafkaResponse) {
+	o.Kafka = &v
+}
+
 func (o TriggerResultTriggerResult) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	if o.Http != nil {
-		toSerialize["http"] = o.Http
-	}
-	if o.Grpc != nil {
-		toSerialize["grpc"] = o.Grpc
-	}
-	if o.Traceid != nil {
-		toSerialize["traceid"] = o.Traceid
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
 	return json.Marshal(toSerialize)
+}
+
+func (o TriggerResultTriggerResult) ToMap() (map[string]interface{}, error) {
+	toSerialize := map[string]interface{}{}
+	if !isNil(o.Http) {
+		toSerialize["http"] = o.Http
+	}
+	if !isNil(o.Grpc) {
+		toSerialize["grpc"] = o.Grpc
+	}
+	if !isNil(o.Traceid) {
+		toSerialize["traceid"] = o.Traceid
+	}
+	if !isNil(o.Kafka) {
+		toSerialize["kafka"] = o.Kafka
+	}
+	return toSerialize, nil
 }
 
 type NullableTriggerResultTriggerResult struct {

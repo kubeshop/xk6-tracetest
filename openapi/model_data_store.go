@@ -15,18 +15,23 @@ import (
 	"time"
 )
 
+// checks if the DataStore type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &DataStore{}
+
 // DataStore struct for DataStore
 type DataStore struct {
-	Id         *string             `json:"id,omitempty"`
-	Name       string              `json:"name"`
-	Type       SupportedDataStores `json:"type"`
-	IsDefault  *bool               `json:"isDefault,omitempty"`
-	Jaeger     *GRPCClientSettings `json:"jaeger,omitempty"`
-	Tempo      *GRPCClientSettings `json:"tempo,omitempty"`
-	OpenSearch *ElasticSearch      `json:"openSearch,omitempty"`
-	ElasticApm *ElasticSearch      `json:"elasticApm,omitempty"`
-	SignalFx   *SignalFX           `json:"signalFx,omitempty"`
-	CreatedAt  *time.Time          `json:"createdAt,omitempty"`
+	Id               *string             `json:"id,omitempty"`
+	Name             string              `json:"name"`
+	Type             SupportedDataStores `json:"type"`
+	Default          *bool               `json:"default,omitempty"`
+	Jaeger           *GRPCClientSettings `json:"jaeger,omitempty"`
+	Tempo            *BaseClient         `json:"tempo,omitempty"`
+	Opensearch       *ElasticSearch      `json:"opensearch,omitempty"`
+	Elasticapm       *ElasticSearch      `json:"elasticapm,omitempty"`
+	Signalfx         *SignalFX           `json:"signalfx,omitempty"`
+	Awsxray          *AwsXRay            `json:"awsxray,omitempty"`
+	Azureappinsights *AzureAppInsights   `json:"azureappinsights,omitempty"`
+	CreatedAt        *time.Time          `json:"createdAt,omitempty"`
 }
 
 // NewDataStore instantiates a new DataStore object
@@ -50,7 +55,7 @@ func NewDataStoreWithDefaults() *DataStore {
 
 // GetId returns the Id field value if set, zero value otherwise.
 func (o *DataStore) GetId() string {
-	if o == nil || o.Id == nil {
+	if o == nil || isNil(o.Id) {
 		var ret string
 		return ret
 	}
@@ -60,7 +65,7 @@ func (o *DataStore) GetId() string {
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *DataStore) GetIdOk() (*string, bool) {
-	if o == nil || o.Id == nil {
+	if o == nil || isNil(o.Id) {
 		return nil, false
 	}
 	return o.Id, true
@@ -68,7 +73,7 @@ func (o *DataStore) GetIdOk() (*string, bool) {
 
 // HasId returns a boolean if a field has been set.
 func (o *DataStore) HasId() bool {
-	if o != nil && o.Id != nil {
+	if o != nil && !isNil(o.Id) {
 		return true
 	}
 
@@ -128,41 +133,41 @@ func (o *DataStore) SetType(v SupportedDataStores) {
 	o.Type = v
 }
 
-// GetIsDefault returns the IsDefault field value if set, zero value otherwise.
-func (o *DataStore) GetIsDefault() bool {
-	if o == nil || o.IsDefault == nil {
+// GetDefault returns the Default field value if set, zero value otherwise.
+func (o *DataStore) GetDefault() bool {
+	if o == nil || isNil(o.Default) {
 		var ret bool
 		return ret
 	}
-	return *o.IsDefault
+	return *o.Default
 }
 
-// GetIsDefaultOk returns a tuple with the IsDefault field value if set, nil otherwise
+// GetDefaultOk returns a tuple with the Default field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DataStore) GetIsDefaultOk() (*bool, bool) {
-	if o == nil || o.IsDefault == nil {
+func (o *DataStore) GetDefaultOk() (*bool, bool) {
+	if o == nil || isNil(o.Default) {
 		return nil, false
 	}
-	return o.IsDefault, true
+	return o.Default, true
 }
 
-// HasIsDefault returns a boolean if a field has been set.
-func (o *DataStore) HasIsDefault() bool {
-	if o != nil && o.IsDefault != nil {
+// HasDefault returns a boolean if a field has been set.
+func (o *DataStore) HasDefault() bool {
+	if o != nil && !isNil(o.Default) {
 		return true
 	}
 
 	return false
 }
 
-// SetIsDefault gets a reference to the given bool and assigns it to the IsDefault field.
-func (o *DataStore) SetIsDefault(v bool) {
-	o.IsDefault = &v
+// SetDefault gets a reference to the given bool and assigns it to the Default field.
+func (o *DataStore) SetDefault(v bool) {
+	o.Default = &v
 }
 
 // GetJaeger returns the Jaeger field value if set, zero value otherwise.
 func (o *DataStore) GetJaeger() GRPCClientSettings {
-	if o == nil || o.Jaeger == nil {
+	if o == nil || isNil(o.Jaeger) {
 		var ret GRPCClientSettings
 		return ret
 	}
@@ -172,7 +177,7 @@ func (o *DataStore) GetJaeger() GRPCClientSettings {
 // GetJaegerOk returns a tuple with the Jaeger field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *DataStore) GetJaegerOk() (*GRPCClientSettings, bool) {
-	if o == nil || o.Jaeger == nil {
+	if o == nil || isNil(o.Jaeger) {
 		return nil, false
 	}
 	return o.Jaeger, true
@@ -180,7 +185,7 @@ func (o *DataStore) GetJaegerOk() (*GRPCClientSettings, bool) {
 
 // HasJaeger returns a boolean if a field has been set.
 func (o *DataStore) HasJaeger() bool {
-	if o != nil && o.Jaeger != nil {
+	if o != nil && !isNil(o.Jaeger) {
 		return true
 	}
 
@@ -193,9 +198,9 @@ func (o *DataStore) SetJaeger(v GRPCClientSettings) {
 }
 
 // GetTempo returns the Tempo field value if set, zero value otherwise.
-func (o *DataStore) GetTempo() GRPCClientSettings {
-	if o == nil || o.Tempo == nil {
-		var ret GRPCClientSettings
+func (o *DataStore) GetTempo() BaseClient {
+	if o == nil || isNil(o.Tempo) {
+		var ret BaseClient
 		return ret
 	}
 	return *o.Tempo
@@ -203,8 +208,8 @@ func (o *DataStore) GetTempo() GRPCClientSettings {
 
 // GetTempoOk returns a tuple with the Tempo field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DataStore) GetTempoOk() (*GRPCClientSettings, bool) {
-	if o == nil || o.Tempo == nil {
+func (o *DataStore) GetTempoOk() (*BaseClient, bool) {
+	if o == nil || isNil(o.Tempo) {
 		return nil, false
 	}
 	return o.Tempo, true
@@ -212,117 +217,181 @@ func (o *DataStore) GetTempoOk() (*GRPCClientSettings, bool) {
 
 // HasTempo returns a boolean if a field has been set.
 func (o *DataStore) HasTempo() bool {
-	if o != nil && o.Tempo != nil {
+	if o != nil && !isNil(o.Tempo) {
 		return true
 	}
 
 	return false
 }
 
-// SetTempo gets a reference to the given GRPCClientSettings and assigns it to the Tempo field.
-func (o *DataStore) SetTempo(v GRPCClientSettings) {
+// SetTempo gets a reference to the given BaseClient and assigns it to the Tempo field.
+func (o *DataStore) SetTempo(v BaseClient) {
 	o.Tempo = &v
 }
 
-// GetOpenSearch returns the OpenSearch field value if set, zero value otherwise.
-func (o *DataStore) GetOpenSearch() ElasticSearch {
-	if o == nil || o.OpenSearch == nil {
+// GetOpensearch returns the Opensearch field value if set, zero value otherwise.
+func (o *DataStore) GetOpensearch() ElasticSearch {
+	if o == nil || isNil(o.Opensearch) {
 		var ret ElasticSearch
 		return ret
 	}
-	return *o.OpenSearch
+	return *o.Opensearch
 }
 
-// GetOpenSearchOk returns a tuple with the OpenSearch field value if set, nil otherwise
+// GetOpensearchOk returns a tuple with the Opensearch field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DataStore) GetOpenSearchOk() (*ElasticSearch, bool) {
-	if o == nil || o.OpenSearch == nil {
+func (o *DataStore) GetOpensearchOk() (*ElasticSearch, bool) {
+	if o == nil || isNil(o.Opensearch) {
 		return nil, false
 	}
-	return o.OpenSearch, true
+	return o.Opensearch, true
 }
 
-// HasOpenSearch returns a boolean if a field has been set.
-func (o *DataStore) HasOpenSearch() bool {
-	if o != nil && o.OpenSearch != nil {
+// HasOpensearch returns a boolean if a field has been set.
+func (o *DataStore) HasOpensearch() bool {
+	if o != nil && !isNil(o.Opensearch) {
 		return true
 	}
 
 	return false
 }
 
-// SetOpenSearch gets a reference to the given ElasticSearch and assigns it to the OpenSearch field.
-func (o *DataStore) SetOpenSearch(v ElasticSearch) {
-	o.OpenSearch = &v
+// SetOpensearch gets a reference to the given ElasticSearch and assigns it to the Opensearch field.
+func (o *DataStore) SetOpensearch(v ElasticSearch) {
+	o.Opensearch = &v
 }
 
-// GetElasticApm returns the ElasticApm field value if set, zero value otherwise.
-func (o *DataStore) GetElasticApm() ElasticSearch {
-	if o == nil || o.ElasticApm == nil {
+// GetElasticapm returns the Elasticapm field value if set, zero value otherwise.
+func (o *DataStore) GetElasticapm() ElasticSearch {
+	if o == nil || isNil(o.Elasticapm) {
 		var ret ElasticSearch
 		return ret
 	}
-	return *o.ElasticApm
+	return *o.Elasticapm
 }
 
-// GetElasticApmOk returns a tuple with the ElasticApm field value if set, nil otherwise
+// GetElasticapmOk returns a tuple with the Elasticapm field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DataStore) GetElasticApmOk() (*ElasticSearch, bool) {
-	if o == nil || o.ElasticApm == nil {
+func (o *DataStore) GetElasticapmOk() (*ElasticSearch, bool) {
+	if o == nil || isNil(o.Elasticapm) {
 		return nil, false
 	}
-	return o.ElasticApm, true
+	return o.Elasticapm, true
 }
 
-// HasElasticApm returns a boolean if a field has been set.
-func (o *DataStore) HasElasticApm() bool {
-	if o != nil && o.ElasticApm != nil {
+// HasElasticapm returns a boolean if a field has been set.
+func (o *DataStore) HasElasticapm() bool {
+	if o != nil && !isNil(o.Elasticapm) {
 		return true
 	}
 
 	return false
 }
 
-// SetElasticApm gets a reference to the given ElasticSearch and assigns it to the ElasticApm field.
-func (o *DataStore) SetElasticApm(v ElasticSearch) {
-	o.ElasticApm = &v
+// SetElasticapm gets a reference to the given ElasticSearch and assigns it to the Elasticapm field.
+func (o *DataStore) SetElasticapm(v ElasticSearch) {
+	o.Elasticapm = &v
 }
 
-// GetSignalFx returns the SignalFx field value if set, zero value otherwise.
-func (o *DataStore) GetSignalFx() SignalFX {
-	if o == nil || o.SignalFx == nil {
+// GetSignalfx returns the Signalfx field value if set, zero value otherwise.
+func (o *DataStore) GetSignalfx() SignalFX {
+	if o == nil || isNil(o.Signalfx) {
 		var ret SignalFX
 		return ret
 	}
-	return *o.SignalFx
+	return *o.Signalfx
 }
 
-// GetSignalFxOk returns a tuple with the SignalFx field value if set, nil otherwise
+// GetSignalfxOk returns a tuple with the Signalfx field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DataStore) GetSignalFxOk() (*SignalFX, bool) {
-	if o == nil || o.SignalFx == nil {
+func (o *DataStore) GetSignalfxOk() (*SignalFX, bool) {
+	if o == nil || isNil(o.Signalfx) {
 		return nil, false
 	}
-	return o.SignalFx, true
+	return o.Signalfx, true
 }
 
-// HasSignalFx returns a boolean if a field has been set.
-func (o *DataStore) HasSignalFx() bool {
-	if o != nil && o.SignalFx != nil {
+// HasSignalfx returns a boolean if a field has been set.
+func (o *DataStore) HasSignalfx() bool {
+	if o != nil && !isNil(o.Signalfx) {
 		return true
 	}
 
 	return false
 }
 
-// SetSignalFx gets a reference to the given SignalFX and assigns it to the SignalFx field.
-func (o *DataStore) SetSignalFx(v SignalFX) {
-	o.SignalFx = &v
+// SetSignalfx gets a reference to the given SignalFX and assigns it to the Signalfx field.
+func (o *DataStore) SetSignalfx(v SignalFX) {
+	o.Signalfx = &v
+}
+
+// GetAwsxray returns the Awsxray field value if set, zero value otherwise.
+func (o *DataStore) GetAwsxray() AwsXRay {
+	if o == nil || isNil(o.Awsxray) {
+		var ret AwsXRay
+		return ret
+	}
+	return *o.Awsxray
+}
+
+// GetAwsxrayOk returns a tuple with the Awsxray field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DataStore) GetAwsxrayOk() (*AwsXRay, bool) {
+	if o == nil || isNil(o.Awsxray) {
+		return nil, false
+	}
+	return o.Awsxray, true
+}
+
+// HasAwsxray returns a boolean if a field has been set.
+func (o *DataStore) HasAwsxray() bool {
+	if o != nil && !isNil(o.Awsxray) {
+		return true
+	}
+
+	return false
+}
+
+// SetAwsxray gets a reference to the given AwsXRay and assigns it to the Awsxray field.
+func (o *DataStore) SetAwsxray(v AwsXRay) {
+	o.Awsxray = &v
+}
+
+// GetAzureappinsights returns the Azureappinsights field value if set, zero value otherwise.
+func (o *DataStore) GetAzureappinsights() AzureAppInsights {
+	if o == nil || isNil(o.Azureappinsights) {
+		var ret AzureAppInsights
+		return ret
+	}
+	return *o.Azureappinsights
+}
+
+// GetAzureappinsightsOk returns a tuple with the Azureappinsights field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DataStore) GetAzureappinsightsOk() (*AzureAppInsights, bool) {
+	if o == nil || isNil(o.Azureappinsights) {
+		return nil, false
+	}
+	return o.Azureappinsights, true
+}
+
+// HasAzureappinsights returns a boolean if a field has been set.
+func (o *DataStore) HasAzureappinsights() bool {
+	if o != nil && !isNil(o.Azureappinsights) {
+		return true
+	}
+
+	return false
+}
+
+// SetAzureappinsights gets a reference to the given AzureAppInsights and assigns it to the Azureappinsights field.
+func (o *DataStore) SetAzureappinsights(v AzureAppInsights) {
+	o.Azureappinsights = &v
 }
 
 // GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
 func (o *DataStore) GetCreatedAt() time.Time {
-	if o == nil || o.CreatedAt == nil {
+	if o == nil || isNil(o.CreatedAt) {
 		var ret time.Time
 		return ret
 	}
@@ -332,7 +401,7 @@ func (o *DataStore) GetCreatedAt() time.Time {
 // GetCreatedAtOk returns a tuple with the CreatedAt field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *DataStore) GetCreatedAtOk() (*time.Time, bool) {
-	if o == nil || o.CreatedAt == nil {
+	if o == nil || isNil(o.CreatedAt) {
 		return nil, false
 	}
 	return o.CreatedAt, true
@@ -340,7 +409,7 @@ func (o *DataStore) GetCreatedAtOk() (*time.Time, bool) {
 
 // HasCreatedAt returns a boolean if a field has been set.
 func (o *DataStore) HasCreatedAt() bool {
-	if o != nil && o.CreatedAt != nil {
+	if o != nil && !isNil(o.CreatedAt) {
 		return true
 	}
 
@@ -353,38 +422,46 @@ func (o *DataStore) SetCreatedAt(v time.Time) {
 }
 
 func (o DataStore) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
-	}
-	if true {
-		toSerialize["name"] = o.Name
-	}
-	if true {
-		toSerialize["type"] = o.Type
-	}
-	if o.IsDefault != nil {
-		toSerialize["isDefault"] = o.IsDefault
-	}
-	if o.Jaeger != nil {
-		toSerialize["jaeger"] = o.Jaeger
-	}
-	if o.Tempo != nil {
-		toSerialize["tempo"] = o.Tempo
-	}
-	if o.OpenSearch != nil {
-		toSerialize["openSearch"] = o.OpenSearch
-	}
-	if o.ElasticApm != nil {
-		toSerialize["elasticApm"] = o.ElasticApm
-	}
-	if o.SignalFx != nil {
-		toSerialize["signalFx"] = o.SignalFx
-	}
-	if o.CreatedAt != nil {
-		toSerialize["createdAt"] = o.CreatedAt
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
 	return json.Marshal(toSerialize)
+}
+
+func (o DataStore) ToMap() (map[string]interface{}, error) {
+	toSerialize := map[string]interface{}{}
+	// skip: id is readOnly
+	toSerialize["name"] = o.Name
+	toSerialize["type"] = o.Type
+	if !isNil(o.Default) {
+		toSerialize["default"] = o.Default
+	}
+	if !isNil(o.Jaeger) {
+		toSerialize["jaeger"] = o.Jaeger
+	}
+	if !isNil(o.Tempo) {
+		toSerialize["tempo"] = o.Tempo
+	}
+	if !isNil(o.Opensearch) {
+		toSerialize["opensearch"] = o.Opensearch
+	}
+	if !isNil(o.Elasticapm) {
+		toSerialize["elasticapm"] = o.Elasticapm
+	}
+	if !isNil(o.Signalfx) {
+		toSerialize["signalfx"] = o.Signalfx
+	}
+	if !isNil(o.Awsxray) {
+		toSerialize["awsxray"] = o.Awsxray
+	}
+	if !isNil(o.Azureappinsights) {
+		toSerialize["azureappinsights"] = o.Azureappinsights
+	}
+	if !isNil(o.CreatedAt) {
+		toSerialize["createdAt"] = o.CreatedAt
+	}
+	return toSerialize, nil
 }
 
 type NullableDataStore struct {

@@ -14,13 +14,17 @@ import (
 	"encoding/json"
 )
 
+// checks if the HTTPRequest type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &HTTPRequest{}
+
 // HTTPRequest struct for HTTPRequest
 type HTTPRequest struct {
-	Url     *string      `json:"url,omitempty"`
-	Method  *string      `json:"method,omitempty"`
-	Headers []HTTPHeader `json:"headers,omitempty"`
-	Body    *string      `json:"body,omitempty"`
-	Auth    *HTTPAuth    `json:"auth,omitempty"`
+	Url             *string      `json:"url,omitempty"`
+	Method          *string      `json:"method,omitempty"`
+	Headers         []HTTPHeader `json:"headers,omitempty"`
+	Body            *string      `json:"body,omitempty"`
+	Auth            *HTTPAuth    `json:"auth,omitempty"`
+	SslVerification *bool        `json:"sslVerification,omitempty"`
 }
 
 // NewHTTPRequest instantiates a new HTTPRequest object
@@ -29,6 +33,8 @@ type HTTPRequest struct {
 // will change when the set of required properties is changed
 func NewHTTPRequest() *HTTPRequest {
 	this := HTTPRequest{}
+	var sslVerification bool = false
+	this.SslVerification = &sslVerification
 	return &this
 }
 
@@ -37,12 +43,14 @@ func NewHTTPRequest() *HTTPRequest {
 // but it doesn't guarantee that properties required by API are set
 func NewHTTPRequestWithDefaults() *HTTPRequest {
 	this := HTTPRequest{}
+	var sslVerification bool = false
+	this.SslVerification = &sslVerification
 	return &this
 }
 
 // GetUrl returns the Url field value if set, zero value otherwise.
 func (o *HTTPRequest) GetUrl() string {
-	if o == nil || o.Url == nil {
+	if o == nil || isNil(o.Url) {
 		var ret string
 		return ret
 	}
@@ -52,7 +60,7 @@ func (o *HTTPRequest) GetUrl() string {
 // GetUrlOk returns a tuple with the Url field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HTTPRequest) GetUrlOk() (*string, bool) {
-	if o == nil || o.Url == nil {
+	if o == nil || isNil(o.Url) {
 		return nil, false
 	}
 	return o.Url, true
@@ -60,7 +68,7 @@ func (o *HTTPRequest) GetUrlOk() (*string, bool) {
 
 // HasUrl returns a boolean if a field has been set.
 func (o *HTTPRequest) HasUrl() bool {
-	if o != nil && o.Url != nil {
+	if o != nil && !isNil(o.Url) {
 		return true
 	}
 
@@ -74,7 +82,7 @@ func (o *HTTPRequest) SetUrl(v string) {
 
 // GetMethod returns the Method field value if set, zero value otherwise.
 func (o *HTTPRequest) GetMethod() string {
-	if o == nil || o.Method == nil {
+	if o == nil || isNil(o.Method) {
 		var ret string
 		return ret
 	}
@@ -84,7 +92,7 @@ func (o *HTTPRequest) GetMethod() string {
 // GetMethodOk returns a tuple with the Method field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HTTPRequest) GetMethodOk() (*string, bool) {
-	if o == nil || o.Method == nil {
+	if o == nil || isNil(o.Method) {
 		return nil, false
 	}
 	return o.Method, true
@@ -92,7 +100,7 @@ func (o *HTTPRequest) GetMethodOk() (*string, bool) {
 
 // HasMethod returns a boolean if a field has been set.
 func (o *HTTPRequest) HasMethod() bool {
-	if o != nil && o.Method != nil {
+	if o != nil && !isNil(o.Method) {
 		return true
 	}
 
@@ -106,7 +114,7 @@ func (o *HTTPRequest) SetMethod(v string) {
 
 // GetHeaders returns the Headers field value if set, zero value otherwise.
 func (o *HTTPRequest) GetHeaders() []HTTPHeader {
-	if o == nil || o.Headers == nil {
+	if o == nil || isNil(o.Headers) {
 		var ret []HTTPHeader
 		return ret
 	}
@@ -116,7 +124,7 @@ func (o *HTTPRequest) GetHeaders() []HTTPHeader {
 // GetHeadersOk returns a tuple with the Headers field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HTTPRequest) GetHeadersOk() ([]HTTPHeader, bool) {
-	if o == nil || o.Headers == nil {
+	if o == nil || isNil(o.Headers) {
 		return nil, false
 	}
 	return o.Headers, true
@@ -124,7 +132,7 @@ func (o *HTTPRequest) GetHeadersOk() ([]HTTPHeader, bool) {
 
 // HasHeaders returns a boolean if a field has been set.
 func (o *HTTPRequest) HasHeaders() bool {
-	if o != nil && o.Headers != nil {
+	if o != nil && !isNil(o.Headers) {
 		return true
 	}
 
@@ -138,7 +146,7 @@ func (o *HTTPRequest) SetHeaders(v []HTTPHeader) {
 
 // GetBody returns the Body field value if set, zero value otherwise.
 func (o *HTTPRequest) GetBody() string {
-	if o == nil || o.Body == nil {
+	if o == nil || isNil(o.Body) {
 		var ret string
 		return ret
 	}
@@ -148,7 +156,7 @@ func (o *HTTPRequest) GetBody() string {
 // GetBodyOk returns a tuple with the Body field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HTTPRequest) GetBodyOk() (*string, bool) {
-	if o == nil || o.Body == nil {
+	if o == nil || isNil(o.Body) {
 		return nil, false
 	}
 	return o.Body, true
@@ -156,7 +164,7 @@ func (o *HTTPRequest) GetBodyOk() (*string, bool) {
 
 // HasBody returns a boolean if a field has been set.
 func (o *HTTPRequest) HasBody() bool {
-	if o != nil && o.Body != nil {
+	if o != nil && !isNil(o.Body) {
 		return true
 	}
 
@@ -170,7 +178,7 @@ func (o *HTTPRequest) SetBody(v string) {
 
 // GetAuth returns the Auth field value if set, zero value otherwise.
 func (o *HTTPRequest) GetAuth() HTTPAuth {
-	if o == nil || o.Auth == nil {
+	if o == nil || isNil(o.Auth) {
 		var ret HTTPAuth
 		return ret
 	}
@@ -180,7 +188,7 @@ func (o *HTTPRequest) GetAuth() HTTPAuth {
 // GetAuthOk returns a tuple with the Auth field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HTTPRequest) GetAuthOk() (*HTTPAuth, bool) {
-	if o == nil || o.Auth == nil {
+	if o == nil || isNil(o.Auth) {
 		return nil, false
 	}
 	return o.Auth, true
@@ -188,7 +196,7 @@ func (o *HTTPRequest) GetAuthOk() (*HTTPAuth, bool) {
 
 // HasAuth returns a boolean if a field has been set.
 func (o *HTTPRequest) HasAuth() bool {
-	if o != nil && o.Auth != nil {
+	if o != nil && !isNil(o.Auth) {
 		return true
 	}
 
@@ -200,24 +208,67 @@ func (o *HTTPRequest) SetAuth(v HTTPAuth) {
 	o.Auth = &v
 }
 
+// GetSslVerification returns the SslVerification field value if set, zero value otherwise.
+func (o *HTTPRequest) GetSslVerification() bool {
+	if o == nil || isNil(o.SslVerification) {
+		var ret bool
+		return ret
+	}
+	return *o.SslVerification
+}
+
+// GetSslVerificationOk returns a tuple with the SslVerification field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HTTPRequest) GetSslVerificationOk() (*bool, bool) {
+	if o == nil || isNil(o.SslVerification) {
+		return nil, false
+	}
+	return o.SslVerification, true
+}
+
+// HasSslVerification returns a boolean if a field has been set.
+func (o *HTTPRequest) HasSslVerification() bool {
+	if o != nil && !isNil(o.SslVerification) {
+		return true
+	}
+
+	return false
+}
+
+// SetSslVerification gets a reference to the given bool and assigns it to the SslVerification field.
+func (o *HTTPRequest) SetSslVerification(v bool) {
+	o.SslVerification = &v
+}
+
 func (o HTTPRequest) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	if o.Url != nil {
-		toSerialize["url"] = o.Url
-	}
-	if o.Method != nil {
-		toSerialize["method"] = o.Method
-	}
-	if o.Headers != nil {
-		toSerialize["headers"] = o.Headers
-	}
-	if o.Body != nil {
-		toSerialize["body"] = o.Body
-	}
-	if o.Auth != nil {
-		toSerialize["auth"] = o.Auth
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
 	return json.Marshal(toSerialize)
+}
+
+func (o HTTPRequest) ToMap() (map[string]interface{}, error) {
+	toSerialize := map[string]interface{}{}
+	if !isNil(o.Url) {
+		toSerialize["url"] = o.Url
+	}
+	if !isNil(o.Method) {
+		toSerialize["method"] = o.Method
+	}
+	if !isNil(o.Headers) {
+		toSerialize["headers"] = o.Headers
+	}
+	if !isNil(o.Body) {
+		toSerialize["body"] = o.Body
+	}
+	if !isNil(o.Auth) {
+		toSerialize["auth"] = o.Auth
+	}
+	if !isNil(o.SslVerification) {
+		toSerialize["sslVerification"] = o.SslVerification
+	}
+	return toSerialize, nil
 }
 
 type NullableHTTPRequest struct {

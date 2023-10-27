@@ -15,38 +15,44 @@ import (
 	"time"
 )
 
-// Transaction struct for Transaction
-type Transaction struct {
+// checks if the TestSuite type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &TestSuite{}
+
+// TestSuite struct for TestSuite
+type TestSuite struct {
 	Id          *string `json:"id,omitempty"`
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
 	// version number of the test
-	Version   *int32       `json:"version,omitempty"`
-	Steps     []Test       `json:"steps,omitempty"`
+	Version *int32 `json:"version,omitempty"`
+	// list of steps of the TestSuite containing just each test id
+	Steps []string `json:"steps,omitempty"`
+	// list of steps of the TestSuite containing the whole test object
+	FullSteps []Test       `json:"fullSteps,omitempty"`
 	CreatedAt *time.Time   `json:"createdAt,omitempty"`
 	Summary   *TestSummary `json:"summary,omitempty"`
 }
 
-// NewTransaction instantiates a new Transaction object
+// NewTestSuite instantiates a new TestSuite object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTransaction() *Transaction {
-	this := Transaction{}
+func NewTestSuite() *TestSuite {
+	this := TestSuite{}
 	return &this
 }
 
-// NewTransactionWithDefaults instantiates a new Transaction object
+// NewTestSuiteWithDefaults instantiates a new TestSuite object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTransactionWithDefaults() *Transaction {
-	this := Transaction{}
+func NewTestSuiteWithDefaults() *TestSuite {
+	this := TestSuite{}
 	return &this
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
-func (o *Transaction) GetId() string {
-	if o == nil || o.Id == nil {
+func (o *TestSuite) GetId() string {
+	if o == nil || isNil(o.Id) {
 		var ret string
 		return ret
 	}
@@ -55,16 +61,16 @@ func (o *Transaction) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetIdOk() (*string, bool) {
-	if o == nil || o.Id == nil {
+func (o *TestSuite) GetIdOk() (*string, bool) {
+	if o == nil || isNil(o.Id) {
 		return nil, false
 	}
 	return o.Id, true
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *Transaction) HasId() bool {
-	if o != nil && o.Id != nil {
+func (o *TestSuite) HasId() bool {
+	if o != nil && !isNil(o.Id) {
 		return true
 	}
 
@@ -72,13 +78,13 @@ func (o *Transaction) HasId() bool {
 }
 
 // SetId gets a reference to the given string and assigns it to the Id field.
-func (o *Transaction) SetId(v string) {
+func (o *TestSuite) SetId(v string) {
 	o.Id = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *Transaction) GetName() string {
-	if o == nil || o.Name == nil {
+func (o *TestSuite) GetName() string {
+	if o == nil || isNil(o.Name) {
 		var ret string
 		return ret
 	}
@@ -87,16 +93,16 @@ func (o *Transaction) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetNameOk() (*string, bool) {
-	if o == nil || o.Name == nil {
+func (o *TestSuite) GetNameOk() (*string, bool) {
+	if o == nil || isNil(o.Name) {
 		return nil, false
 	}
 	return o.Name, true
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *Transaction) HasName() bool {
-	if o != nil && o.Name != nil {
+func (o *TestSuite) HasName() bool {
+	if o != nil && !isNil(o.Name) {
 		return true
 	}
 
@@ -104,13 +110,13 @@ func (o *Transaction) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *Transaction) SetName(v string) {
+func (o *TestSuite) SetName(v string) {
 	o.Name = &v
 }
 
 // GetDescription returns the Description field value if set, zero value otherwise.
-func (o *Transaction) GetDescription() string {
-	if o == nil || o.Description == nil {
+func (o *TestSuite) GetDescription() string {
+	if o == nil || isNil(o.Description) {
 		var ret string
 		return ret
 	}
@@ -119,16 +125,16 @@ func (o *Transaction) GetDescription() string {
 
 // GetDescriptionOk returns a tuple with the Description field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetDescriptionOk() (*string, bool) {
-	if o == nil || o.Description == nil {
+func (o *TestSuite) GetDescriptionOk() (*string, bool) {
+	if o == nil || isNil(o.Description) {
 		return nil, false
 	}
 	return o.Description, true
 }
 
 // HasDescription returns a boolean if a field has been set.
-func (o *Transaction) HasDescription() bool {
-	if o != nil && o.Description != nil {
+func (o *TestSuite) HasDescription() bool {
+	if o != nil && !isNil(o.Description) {
 		return true
 	}
 
@@ -136,13 +142,13 @@ func (o *Transaction) HasDescription() bool {
 }
 
 // SetDescription gets a reference to the given string and assigns it to the Description field.
-func (o *Transaction) SetDescription(v string) {
+func (o *TestSuite) SetDescription(v string) {
 	o.Description = &v
 }
 
 // GetVersion returns the Version field value if set, zero value otherwise.
-func (o *Transaction) GetVersion() int32 {
-	if o == nil || o.Version == nil {
+func (o *TestSuite) GetVersion() int32 {
+	if o == nil || isNil(o.Version) {
 		var ret int32
 		return ret
 	}
@@ -151,16 +157,16 @@ func (o *Transaction) GetVersion() int32 {
 
 // GetVersionOk returns a tuple with the Version field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetVersionOk() (*int32, bool) {
-	if o == nil || o.Version == nil {
+func (o *TestSuite) GetVersionOk() (*int32, bool) {
+	if o == nil || isNil(o.Version) {
 		return nil, false
 	}
 	return o.Version, true
 }
 
 // HasVersion returns a boolean if a field has been set.
-func (o *Transaction) HasVersion() bool {
-	if o != nil && o.Version != nil {
+func (o *TestSuite) HasVersion() bool {
+	if o != nil && !isNil(o.Version) {
 		return true
 	}
 
@@ -168,14 +174,14 @@ func (o *Transaction) HasVersion() bool {
 }
 
 // SetVersion gets a reference to the given int32 and assigns it to the Version field.
-func (o *Transaction) SetVersion(v int32) {
+func (o *TestSuite) SetVersion(v int32) {
 	o.Version = &v
 }
 
 // GetSteps returns the Steps field value if set, zero value otherwise.
-func (o *Transaction) GetSteps() []Test {
-	if o == nil || o.Steps == nil {
-		var ret []Test
+func (o *TestSuite) GetSteps() []string {
+	if o == nil || isNil(o.Steps) {
+		var ret []string
 		return ret
 	}
 	return o.Steps
@@ -183,30 +189,62 @@ func (o *Transaction) GetSteps() []Test {
 
 // GetStepsOk returns a tuple with the Steps field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetStepsOk() ([]Test, bool) {
-	if o == nil || o.Steps == nil {
+func (o *TestSuite) GetStepsOk() ([]string, bool) {
+	if o == nil || isNil(o.Steps) {
 		return nil, false
 	}
 	return o.Steps, true
 }
 
 // HasSteps returns a boolean if a field has been set.
-func (o *Transaction) HasSteps() bool {
-	if o != nil && o.Steps != nil {
+func (o *TestSuite) HasSteps() bool {
+	if o != nil && !isNil(o.Steps) {
 		return true
 	}
 
 	return false
 }
 
-// SetSteps gets a reference to the given []Test and assigns it to the Steps field.
-func (o *Transaction) SetSteps(v []Test) {
+// SetSteps gets a reference to the given []string and assigns it to the Steps field.
+func (o *TestSuite) SetSteps(v []string) {
 	o.Steps = v
 }
 
+// GetFullSteps returns the FullSteps field value if set, zero value otherwise.
+func (o *TestSuite) GetFullSteps() []Test {
+	if o == nil || isNil(o.FullSteps) {
+		var ret []Test
+		return ret
+	}
+	return o.FullSteps
+}
+
+// GetFullStepsOk returns a tuple with the FullSteps field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TestSuite) GetFullStepsOk() ([]Test, bool) {
+	if o == nil || isNil(o.FullSteps) {
+		return nil, false
+	}
+	return o.FullSteps, true
+}
+
+// HasFullSteps returns a boolean if a field has been set.
+func (o *TestSuite) HasFullSteps() bool {
+	if o != nil && !isNil(o.FullSteps) {
+		return true
+	}
+
+	return false
+}
+
+// SetFullSteps gets a reference to the given []Test and assigns it to the FullSteps field.
+func (o *TestSuite) SetFullSteps(v []Test) {
+	o.FullSteps = v
+}
+
 // GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
-func (o *Transaction) GetCreatedAt() time.Time {
-	if o == nil || o.CreatedAt == nil {
+func (o *TestSuite) GetCreatedAt() time.Time {
+	if o == nil || isNil(o.CreatedAt) {
 		var ret time.Time
 		return ret
 	}
@@ -215,16 +253,16 @@ func (o *Transaction) GetCreatedAt() time.Time {
 
 // GetCreatedAtOk returns a tuple with the CreatedAt field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetCreatedAtOk() (*time.Time, bool) {
-	if o == nil || o.CreatedAt == nil {
+func (o *TestSuite) GetCreatedAtOk() (*time.Time, bool) {
+	if o == nil || isNil(o.CreatedAt) {
 		return nil, false
 	}
 	return o.CreatedAt, true
 }
 
 // HasCreatedAt returns a boolean if a field has been set.
-func (o *Transaction) HasCreatedAt() bool {
-	if o != nil && o.CreatedAt != nil {
+func (o *TestSuite) HasCreatedAt() bool {
+	if o != nil && !isNil(o.CreatedAt) {
 		return true
 	}
 
@@ -232,13 +270,13 @@ func (o *Transaction) HasCreatedAt() bool {
 }
 
 // SetCreatedAt gets a reference to the given time.Time and assigns it to the CreatedAt field.
-func (o *Transaction) SetCreatedAt(v time.Time) {
+func (o *TestSuite) SetCreatedAt(v time.Time) {
 	o.CreatedAt = &v
 }
 
 // GetSummary returns the Summary field value if set, zero value otherwise.
-func (o *Transaction) GetSummary() TestSummary {
-	if o == nil || o.Summary == nil {
+func (o *TestSuite) GetSummary() TestSummary {
+	if o == nil || isNil(o.Summary) {
 		var ret TestSummary
 		return ret
 	}
@@ -247,16 +285,16 @@ func (o *Transaction) GetSummary() TestSummary {
 
 // GetSummaryOk returns a tuple with the Summary field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Transaction) GetSummaryOk() (*TestSummary, bool) {
-	if o == nil || o.Summary == nil {
+func (o *TestSuite) GetSummaryOk() (*TestSummary, bool) {
+	if o == nil || isNil(o.Summary) {
 		return nil, false
 	}
 	return o.Summary, true
 }
 
 // HasSummary returns a boolean if a field has been set.
-func (o *Transaction) HasSummary() bool {
-	if o != nil && o.Summary != nil {
+func (o *TestSuite) HasSummary() bool {
+	if o != nil && !isNil(o.Summary) {
 		return true
 	}
 
@@ -264,68 +302,79 @@ func (o *Transaction) HasSummary() bool {
 }
 
 // SetSummary gets a reference to the given TestSummary and assigns it to the Summary field.
-func (o *Transaction) SetSummary(v TestSummary) {
+func (o *TestSuite) SetSummary(v TestSummary) {
 	o.Summary = &v
 }
 
-func (o Transaction) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
-	}
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
-	}
-	if o.Description != nil {
-		toSerialize["description"] = o.Description
-	}
-	if o.Version != nil {
-		toSerialize["version"] = o.Version
-	}
-	if o.Steps != nil {
-		toSerialize["steps"] = o.Steps
-	}
-	if o.CreatedAt != nil {
-		toSerialize["createdAt"] = o.CreatedAt
-	}
-	if o.Summary != nil {
-		toSerialize["summary"] = o.Summary
+func (o TestSuite) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
 	return json.Marshal(toSerialize)
 }
 
-type NullableTransaction struct {
-	value *Transaction
+func (o TestSuite) ToMap() (map[string]interface{}, error) {
+	toSerialize := map[string]interface{}{}
+	if !isNil(o.Id) {
+		toSerialize["id"] = o.Id
+	}
+	if !isNil(o.Name) {
+		toSerialize["name"] = o.Name
+	}
+	if !isNil(o.Description) {
+		toSerialize["description"] = o.Description
+	}
+	if !isNil(o.Version) {
+		toSerialize["version"] = o.Version
+	}
+	if !isNil(o.Steps) {
+		toSerialize["steps"] = o.Steps
+	}
+	if !isNil(o.FullSteps) {
+		toSerialize["fullSteps"] = o.FullSteps
+	}
+	if !isNil(o.CreatedAt) {
+		toSerialize["createdAt"] = o.CreatedAt
+	}
+	if !isNil(o.Summary) {
+		toSerialize["summary"] = o.Summary
+	}
+	return toSerialize, nil
+}
+
+type NullableTestSuite struct {
+	value *TestSuite
 	isSet bool
 }
 
-func (v NullableTransaction) Get() *Transaction {
+func (v NullableTestSuite) Get() *TestSuite {
 	return v.value
 }
 
-func (v *NullableTransaction) Set(val *Transaction) {
+func (v *NullableTestSuite) Set(val *TestSuite) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTransaction) IsSet() bool {
+func (v NullableTestSuite) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTransaction) Unset() {
+func (v *NullableTestSuite) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTransaction(val *Transaction) *NullableTransaction {
-	return &NullableTransaction{value: val, isSet: true}
+func NewNullableTestSuite(val *TestSuite) *NullableTestSuite {
+	return &NullableTestSuite{value: val, isSet: true}
 }
 
-func (v NullableTransaction) MarshalJSON() ([]byte, error) {
+func (v NullableTestSuite) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTransaction) UnmarshalJSON(src []byte) error {
+func (v *NullableTestSuite) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

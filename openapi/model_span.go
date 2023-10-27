@@ -14,11 +14,15 @@ import (
 	"encoding/json"
 )
 
+// checks if the Span type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Span{}
+
 // Span struct for Span
 type Span struct {
 	Id       *string `json:"id,omitempty"`
 	ParentId *string `json:"parentId,omitempty"`
 	Name     *string `json:"name,omitempty"`
+	Kind     *string `json:"kind,omitempty"`
 	// span start time in unix milli format
 	StartTime *int64 `json:"startTime,omitempty"`
 	// span end time in unix milli format
@@ -47,7 +51,7 @@ func NewSpanWithDefaults() *Span {
 
 // GetId returns the Id field value if set, zero value otherwise.
 func (o *Span) GetId() string {
-	if o == nil || o.Id == nil {
+	if o == nil || isNil(o.Id) {
 		var ret string
 		return ret
 	}
@@ -57,7 +61,7 @@ func (o *Span) GetId() string {
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetIdOk() (*string, bool) {
-	if o == nil || o.Id == nil {
+	if o == nil || isNil(o.Id) {
 		return nil, false
 	}
 	return o.Id, true
@@ -65,7 +69,7 @@ func (o *Span) GetIdOk() (*string, bool) {
 
 // HasId returns a boolean if a field has been set.
 func (o *Span) HasId() bool {
-	if o != nil && o.Id != nil {
+	if o != nil && !isNil(o.Id) {
 		return true
 	}
 
@@ -79,7 +83,7 @@ func (o *Span) SetId(v string) {
 
 // GetParentId returns the ParentId field value if set, zero value otherwise.
 func (o *Span) GetParentId() string {
-	if o == nil || o.ParentId == nil {
+	if o == nil || isNil(o.ParentId) {
 		var ret string
 		return ret
 	}
@@ -89,7 +93,7 @@ func (o *Span) GetParentId() string {
 // GetParentIdOk returns a tuple with the ParentId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetParentIdOk() (*string, bool) {
-	if o == nil || o.ParentId == nil {
+	if o == nil || isNil(o.ParentId) {
 		return nil, false
 	}
 	return o.ParentId, true
@@ -97,7 +101,7 @@ func (o *Span) GetParentIdOk() (*string, bool) {
 
 // HasParentId returns a boolean if a field has been set.
 func (o *Span) HasParentId() bool {
-	if o != nil && o.ParentId != nil {
+	if o != nil && !isNil(o.ParentId) {
 		return true
 	}
 
@@ -111,7 +115,7 @@ func (o *Span) SetParentId(v string) {
 
 // GetName returns the Name field value if set, zero value otherwise.
 func (o *Span) GetName() string {
-	if o == nil || o.Name == nil {
+	if o == nil || isNil(o.Name) {
 		var ret string
 		return ret
 	}
@@ -121,7 +125,7 @@ func (o *Span) GetName() string {
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetNameOk() (*string, bool) {
-	if o == nil || o.Name == nil {
+	if o == nil || isNil(o.Name) {
 		return nil, false
 	}
 	return o.Name, true
@@ -129,7 +133,7 @@ func (o *Span) GetNameOk() (*string, bool) {
 
 // HasName returns a boolean if a field has been set.
 func (o *Span) HasName() bool {
-	if o != nil && o.Name != nil {
+	if o != nil && !isNil(o.Name) {
 		return true
 	}
 
@@ -141,9 +145,41 @@ func (o *Span) SetName(v string) {
 	o.Name = &v
 }
 
+// GetKind returns the Kind field value if set, zero value otherwise.
+func (o *Span) GetKind() string {
+	if o == nil || isNil(o.Kind) {
+		var ret string
+		return ret
+	}
+	return *o.Kind
+}
+
+// GetKindOk returns a tuple with the Kind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Span) GetKindOk() (*string, bool) {
+	if o == nil || isNil(o.Kind) {
+		return nil, false
+	}
+	return o.Kind, true
+}
+
+// HasKind returns a boolean if a field has been set.
+func (o *Span) HasKind() bool {
+	if o != nil && !isNil(o.Kind) {
+		return true
+	}
+
+	return false
+}
+
+// SetKind gets a reference to the given string and assigns it to the Kind field.
+func (o *Span) SetKind(v string) {
+	o.Kind = &v
+}
+
 // GetStartTime returns the StartTime field value if set, zero value otherwise.
 func (o *Span) GetStartTime() int64 {
-	if o == nil || o.StartTime == nil {
+	if o == nil || isNil(o.StartTime) {
 		var ret int64
 		return ret
 	}
@@ -153,7 +189,7 @@ func (o *Span) GetStartTime() int64 {
 // GetStartTimeOk returns a tuple with the StartTime field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetStartTimeOk() (*int64, bool) {
-	if o == nil || o.StartTime == nil {
+	if o == nil || isNil(o.StartTime) {
 		return nil, false
 	}
 	return o.StartTime, true
@@ -161,7 +197,7 @@ func (o *Span) GetStartTimeOk() (*int64, bool) {
 
 // HasStartTime returns a boolean if a field has been set.
 func (o *Span) HasStartTime() bool {
-	if o != nil && o.StartTime != nil {
+	if o != nil && !isNil(o.StartTime) {
 		return true
 	}
 
@@ -175,7 +211,7 @@ func (o *Span) SetStartTime(v int64) {
 
 // GetEndTime returns the EndTime field value if set, zero value otherwise.
 func (o *Span) GetEndTime() int64 {
-	if o == nil || o.EndTime == nil {
+	if o == nil || isNil(o.EndTime) {
 		var ret int64
 		return ret
 	}
@@ -185,7 +221,7 @@ func (o *Span) GetEndTime() int64 {
 // GetEndTimeOk returns a tuple with the EndTime field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetEndTimeOk() (*int64, bool) {
-	if o == nil || o.EndTime == nil {
+	if o == nil || isNil(o.EndTime) {
 		return nil, false
 	}
 	return o.EndTime, true
@@ -193,7 +229,7 @@ func (o *Span) GetEndTimeOk() (*int64, bool) {
 
 // HasEndTime returns a boolean if a field has been set.
 func (o *Span) HasEndTime() bool {
-	if o != nil && o.EndTime != nil {
+	if o != nil && !isNil(o.EndTime) {
 		return true
 	}
 
@@ -207,7 +243,7 @@ func (o *Span) SetEndTime(v int64) {
 
 // GetAttributes returns the Attributes field value if set, zero value otherwise.
 func (o *Span) GetAttributes() map[string]string {
-	if o == nil || o.Attributes == nil {
+	if o == nil || isNil(o.Attributes) {
 		var ret map[string]string
 		return ret
 	}
@@ -217,7 +253,7 @@ func (o *Span) GetAttributes() map[string]string {
 // GetAttributesOk returns a tuple with the Attributes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetAttributesOk() (*map[string]string, bool) {
-	if o == nil || o.Attributes == nil {
+	if o == nil || isNil(o.Attributes) {
 		return nil, false
 	}
 	return o.Attributes, true
@@ -225,7 +261,7 @@ func (o *Span) GetAttributesOk() (*map[string]string, bool) {
 
 // HasAttributes returns a boolean if a field has been set.
 func (o *Span) HasAttributes() bool {
-	if o != nil && o.Attributes != nil {
+	if o != nil && !isNil(o.Attributes) {
 		return true
 	}
 
@@ -239,7 +275,7 @@ func (o *Span) SetAttributes(v map[string]string) {
 
 // GetChildren returns the Children field value if set, zero value otherwise.
 func (o *Span) GetChildren() []Span {
-	if o == nil || o.Children == nil {
+	if o == nil || isNil(o.Children) {
 		var ret []Span
 		return ret
 	}
@@ -249,7 +285,7 @@ func (o *Span) GetChildren() []Span {
 // GetChildrenOk returns a tuple with the Children field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Span) GetChildrenOk() ([]Span, bool) {
-	if o == nil || o.Children == nil {
+	if o == nil || isNil(o.Children) {
 		return nil, false
 	}
 	return o.Children, true
@@ -257,7 +293,7 @@ func (o *Span) GetChildrenOk() ([]Span, bool) {
 
 // HasChildren returns a boolean if a field has been set.
 func (o *Span) HasChildren() bool {
-	if o != nil && o.Children != nil {
+	if o != nil && !isNil(o.Children) {
 		return true
 	}
 
@@ -270,29 +306,40 @@ func (o *Span) SetChildren(v []Span) {
 }
 
 func (o Span) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
-	}
-	if o.ParentId != nil {
-		toSerialize["parentId"] = o.ParentId
-	}
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
-	}
-	if o.StartTime != nil {
-		toSerialize["startTime"] = o.StartTime
-	}
-	if o.EndTime != nil {
-		toSerialize["endTime"] = o.EndTime
-	}
-	if o.Attributes != nil {
-		toSerialize["attributes"] = o.Attributes
-	}
-	if o.Children != nil {
-		toSerialize["children"] = o.Children
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
 	return json.Marshal(toSerialize)
+}
+
+func (o Span) ToMap() (map[string]interface{}, error) {
+	toSerialize := map[string]interface{}{}
+	if !isNil(o.Id) {
+		toSerialize["id"] = o.Id
+	}
+	if !isNil(o.ParentId) {
+		toSerialize["parentId"] = o.ParentId
+	}
+	if !isNil(o.Name) {
+		toSerialize["name"] = o.Name
+	}
+	if !isNil(o.Kind) {
+		toSerialize["kind"] = o.Kind
+	}
+	if !isNil(o.StartTime) {
+		toSerialize["startTime"] = o.StartTime
+	}
+	if !isNil(o.EndTime) {
+		toSerialize["endTime"] = o.EndTime
+	}
+	if !isNil(o.Attributes) {
+		toSerialize["attributes"] = o.Attributes
+	}
+	if !isNil(o.Children) {
+		toSerialize["children"] = o.Children
+	}
+	return toSerialize, nil
 }
 
 type NullableSpan struct {
