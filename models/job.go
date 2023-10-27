@@ -46,7 +46,7 @@ func NewJob(traceId string, options TracetestOptions, request Request) Job {
 }
 
 func (job Job) HandleRunResponse(run *openapi.TestRun, err error) Job {
-	if run == nil {
+	if err != nil {
 		job.JobStatus = Failed
 		job.Error = err.Error()
 	} else {

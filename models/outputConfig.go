@@ -17,11 +17,7 @@ type OutputConfig struct {
 }
 
 func NewConfig(params output.Params) (OutputConfig, error) {
-	cfg := OutputConfig{
-		ServerUrl:  ServerURL,
-		ServerPath: ServerPath,
-		APIToken:   APIToken,
-	}
+	cfg := OutputConfig{}
 
 	if params.ConfigArgument != "" {
 		cfg.ServerUrl = params.ConfigArgument

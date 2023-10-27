@@ -80,7 +80,7 @@ func getJWTFromToken(url *url.URL, token string) (string, error) {
 func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
 	request := t.client.ApiApi.RunTest(context.Background(), job.TestID)
 	request = request.RunInformation(openapi.RunInformation{
-		Variables: []openapi.EnvironmentValue{{
+		Variables: []openapi.VariableSetValue{{
 			Key:   &job.TracetestOptions.VariableName,
 			Value: &job.TraceID,
 		}},
@@ -91,7 +91,7 @@ func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
 	return run, err
 }
 
-func (t *Tracetest) waitForTestResult(testID, testRunID string) (openapi.TestRun, error) {
+func (t *Tracetest) waitForTestResult(testID string, testRunID int32) (openapi.TestRun, error) {
 	var (
 		testRun   openapi.TestRun
 		lastError error
@@ -129,7 +129,7 @@ func (t *Tracetest) waitForTestResult(testID, testRunID string) (openapi.TestRun
 	return testRun, nil
 }
 
-func (t *Tracetest) getIsTestReady(ctx context.Context, testID, testRunId string) (*openapi.TestRun, error) {
+func (t *Tracetest) getIsTestReady(ctx context.Context, testID string, testRunId int32) (*openapi.TestRun, error) {
 	req := t.client.ApiApi.GetTestRun(ctx, testID, testRunId)
 	run, _, err := t.client.ApiApi.GetTestRunExecute(req)
 

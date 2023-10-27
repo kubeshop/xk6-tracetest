@@ -48,8 +48,10 @@ func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
 	apiOptions := models.ApiOptions{
 		ServerUrl:  config.ServerUrl,
 		ServerPath: config.ServerPath,
+		APIToken:   config.APIToken,
 	}
 
+	t.apiOptions = apiOptions
 	t.client = NewAPIClient(apiOptions)
 }
 
@@ -58,13 +60,6 @@ func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
 	defer t.mutex.Unlock()
 
 	rt := t.Vu.Runtime()
-	apiOptions, err := models.NewApiOptions(t.Vu, call.Argument(0))
-	if err != nil {
-		common.Throw(rt, err)
-	}
-
-	t.apiOptions = apiOptions
-	t.client = NewAPIClient(apiOptions)
 
 	return rt.ToValue(t).ToObject(rt)
 }
