@@ -26,10 +26,24 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	config.Scheme = url.Scheme
 
 	if options.APIToken != "" {
+		version, err := getVersion(url)
+		if err != nil {
+			panic(err)
+		}
+
+		url, err = url.Parse(*version.ApiEndpoint)
+		if err != nil {
+			panic(err)
+		}
+
 		jwt, err := getJWTFromToken(url, options.APIToken)
 		if err != nil {
 			panic(err)
 		}
+
+		config.Host = url.Host
+		config.Scheme = url.Scheme
+		options.ServerPath = url.Path
 		config.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", jwt))
 	}
 
@@ -44,8 +58,35 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	return openapi.NewAPIClient(config)
 }
 
+func getVersion(url *url.URL) (*openapi.Version, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/version.json", url.Scheme, url.Host), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request for version: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send request for version: %w", err)
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("could not read body from response: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var version openapi.Version
+
+	err = json.Unmarshal(respBody, &version)
+	if err != nil {
+		return nil, fmt.Errorf("could not unmarshal response body: %w", err)
+	}
+
+	return &version, nil
+}
+
 func getJWTFromToken(url *url.URL, token string) (string, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/tokens/%s/exchange", url.Scheme, url.Host, token), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s%s/tokens/%s/exchange", url.Scheme, url.Host, url.Path, token), nil)
 	if err != nil {
 		return "", fmt.Errorf("could not create request for token exchange: %w", err)
 	}
@@ -61,6 +102,7 @@ func getJWTFromToken(url *url.URL, token string) (string, error) {
 	}
 
 	respBody, err := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	if err != nil {
 		return "", fmt.Errorf("could not read body from response: %w", err)
 	}
@@ -87,8 +129,18 @@ func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
 		Metadata: job.Request.Metadata,
 	})
 
-	run, _, err := t.client.ApiApi.RunTestExecute(request)
-	return run, err
+	run, resp, err := t.client.ApiApi.RunTestExecute(request)
+	respBody, readErr := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if readErr != nil {
+		return nil, fmt.Errorf("could not read body from response: %w", err)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("could not execute test run: %s %w,", respBody, err)
+	}
+
+	return run, nil
 }
 
 func (t *Tracetest) waitForTestResult(testID string, testRunID int32) (openapi.TestRun, error) {
@@ -137,7 +189,7 @@ func (t *Tracetest) getIsTestReady(ctx context.Context, testID string, testRunId
 		return &openapi.TestRun{}, fmt.Errorf("could not execute GetTestRun request: %w", err)
 	}
 
-	if *run.State == "FAILED" || *run.State == "FINISHED" {
+	if isStateFailed(*run.State) || isStateFinished(*run.State) {
 		return run, nil
 	}
 
@@ -222,4 +274,16 @@ func (t *Tracetest) jsonSummary() JsonResult {
 	})
 
 	return JsonResult
+}
+
+func isStateFinished(state string) bool {
+	return isStateFailed(state) || state == "FINISHED"
+}
+
+func isStateFailed(state string) bool {
+	return state == "TRIGGER_FAILED" ||
+		state == "TRACE_FAILED" ||
+		state == "ASSERTION_FAILED" ||
+		state == "ANALYZING_ERROR" ||
+		state == "FAILED" // this one is for backwards compatibility
 }
