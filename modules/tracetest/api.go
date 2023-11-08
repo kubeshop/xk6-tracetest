@@ -2,16 +2,20 @@ package tracetest
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/kubeshop/xk6-tracetest/models"
 	"github.com/kubeshop/xk6-tracetest/openapi"
 )
 
-func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
+func NewAPIClient(options models.ApiOptions) (*openapi.APIClient, string) {
 	url, err := url.Parse(options.ServerUrl)
 
 	if err != nil {
@@ -22,6 +26,29 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	config.Host = url.Host
 	config.Scheme = url.Scheme
 
+	jwt := ""
+	if options.APIToken != "" {
+		version, err := getVersion(url)
+		if err != nil {
+			panic(err)
+		}
+
+		url, err = url.Parse(*version.ApiEndpoint)
+		if err != nil {
+			panic(err)
+		}
+
+		jwt, err = getJWTFromToken(url, options.APIToken)
+		if err != nil {
+			panic(err)
+		}
+
+		config.Host = url.Host
+		config.Scheme = url.Scheme
+		options.ServerPath = url.Path
+		config.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", jwt))
+	}
+
 	if options.ServerPath != "" {
 		config.Servers = []openapi.ServerConfiguration{
 			{
@@ -30,24 +57,109 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 		}
 	}
 
-	return openapi.NewAPIClient(config)
+	return openapi.NewAPIClient(config), jwt
+}
+
+func getVersion(url *url.URL) (*openapi.Version, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s/version.json", url.Scheme, url.Host), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request for version: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not send request for version: %w", err)
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("could not read body from response: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var version openapi.Version
+
+	err = json.Unmarshal(respBody, &version)
+	if err != nil {
+		return nil, fmt.Errorf("could not unmarshal response body: %w", err)
+	}
+
+	return &version, nil
+}
+
+func getJWTFromToken(url *url.URL, token string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s://%s%s/tokens/%s/exchange", url.Scheme, url.Host, url.Path, token), nil)
+	if err != nil {
+		return "", fmt.Errorf("could not create request for token exchange: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("could not send request for token exchange: %w", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		// Probably an OS version of tracetest
+		return "", fmt.Errorf("tracetest server doesn't support API Tokens")
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", fmt.Errorf("could not read body from response: %w", err)
+	}
+
+	respJson := struct {
+		JWT string `json:"jwt"`
+	}{}
+
+	err = json.Unmarshal(respBody, &respJson)
+	if err != nil {
+		return "", fmt.Errorf("could not unmarshal response body: %w", err)
+	}
+
+	return respJson.JWT, nil
+}
+
+func getTokenClaims(tokenString string) (jwt.MapClaims, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return jwt.MapClaims{}, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return jwt.MapClaims{}, fmt.Errorf("invalid token claims")
+	}
+
+	return claims, nil
 }
 
 func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
 	request := t.client.ApiApi.RunTest(context.Background(), job.TestID)
 	request = request.RunInformation(openapi.RunInformation{
-		Variables: []openapi.EnvironmentValue{{
+		Variables: []openapi.VariableSetValue{{
 			Key:   &job.TracetestOptions.VariableName,
 			Value: &job.TraceID,
 		}},
 		Metadata: job.Request.Metadata,
 	})
 
-	run, _, err := t.client.ApiApi.RunTestExecute(request)
-	return run, err
+	run, resp, err := t.client.ApiApi.RunTestExecute(request)
+	respBody, readErr := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if readErr != nil {
+		return nil, fmt.Errorf("could not read body from response: %w", err)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("could not execute test run: %s %w,", respBody, err)
+	}
+
+	return run, nil
 }
 
-func (t *Tracetest) waitForTestResult(testID, testRunID string) (openapi.TestRun, error) {
+func (t *Tracetest) waitForTestResult(testID string, testRunID int32) (openapi.TestRun, error) {
 	var (
 		testRun   openapi.TestRun
 		lastError error
@@ -85,7 +197,7 @@ func (t *Tracetest) waitForTestResult(testID, testRunID string) (openapi.TestRun
 	return testRun, nil
 }
 
-func (t *Tracetest) getIsTestReady(ctx context.Context, testID, testRunId string) (*openapi.TestRun, error) {
+func (t *Tracetest) getIsTestReady(ctx context.Context, testID string, testRunId int32) (*openapi.TestRun, error) {
 	req := t.client.ApiApi.GetTestRun(ctx, testID, testRunId)
 	run, _, err := t.client.ApiApi.GetTestRunExecute(req)
 
@@ -93,7 +205,7 @@ func (t *Tracetest) getIsTestReady(ctx context.Context, testID, testRunId string
 		return &openapi.TestRun{}, fmt.Errorf("could not execute GetTestRun request: %w", err)
 	}
 
-	if *run.State == "FAILED" || *run.State == "FINISHED" {
+	if isStateFailed(*run.State) || isStateFinished(*run.State) {
 		return run, nil
 	}
 
@@ -116,6 +228,20 @@ func (t *Tracetest) jobSummary() (successfulJobs, failedJobs []models.Job) {
 	return
 }
 
+func (t *Tracetest) getBaseUrl() string {
+	base := t.apiOptions.ServerUrl
+
+	if t.jwt != "" {
+		claims, _ := getTokenClaims(t.jwt)
+		organizationId := claims["organization_id"].(string)
+		environmentId := claims["environment_id"].(string)
+
+		return fmt.Sprintf("%s/organizations/%s/environments/%s", base, organizationId, environmentId)
+	}
+
+	return base
+}
+
 func (t *Tracetest) stringSummary() string {
 	successfulJobs, failedJobs := t.jobSummary()
 	failedSummary := "[FAILED] \n"
@@ -124,12 +250,14 @@ func (t *Tracetest) stringSummary() string {
 	failedRuns := len(failedJobs)
 	successfulRuns := len(successfulJobs)
 
+	baseUrl := t.getBaseUrl()
+
 	for _, job := range failedJobs {
-		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
+		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
 	}
 
 	for _, job := range successfulJobs {
-		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
+		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
 	}
 
 	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", totalRuns, successfulRuns, failedRuns)
@@ -178,4 +306,16 @@ func (t *Tracetest) jsonSummary() JsonResult {
 	})
 
 	return JsonResult
+}
+
+func isStateFinished(state string) bool {
+	return isStateFailed(state) || state == "FINISHED"
+}
+
+func isStateFailed(state string) bool {
+	return state == "TRIGGER_FAILED" ||
+		state == "TRACE_FAILED" ||
+		state == "ASSERTION_FAILED" ||
+		state == "ANALYZING_ERROR" ||
+		state == "FAILED" // this one is for backwards compatibility
 }

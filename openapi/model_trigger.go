@@ -14,10 +14,16 @@ import (
 	"encoding/json"
 )
 
+// checks if the Trigger type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Trigger{}
+
 // Trigger struct for Trigger
 type Trigger struct {
-	TriggerType     *string                 `json:"triggerType,omitempty"`
-	TriggerSettings *TriggerTriggerSettings `json:"triggerSettings,omitempty"`
+	Type        *string         `json:"type,omitempty"`
+	HttpRequest *HTTPRequest    `json:"httpRequest,omitempty"`
+	Grpc        *GRPCRequest    `json:"grpc,omitempty"`
+	Traceid     *TRACEIDRequest `json:"traceid,omitempty"`
+	Kafka       *KafkaRequest   `json:"kafka,omitempty"`
 }
 
 // NewTrigger instantiates a new Trigger object
@@ -37,79 +43,192 @@ func NewTriggerWithDefaults() *Trigger {
 	return &this
 }
 
-// GetTriggerType returns the TriggerType field value if set, zero value otherwise.
-func (o *Trigger) GetTriggerType() string {
-	if o == nil || o.TriggerType == nil {
+// GetType returns the Type field value if set, zero value otherwise.
+func (o *Trigger) GetType() string {
+	if o == nil || isNil(o.Type) {
 		var ret string
 		return ret
 	}
-	return *o.TriggerType
+	return *o.Type
 }
 
-// GetTriggerTypeOk returns a tuple with the TriggerType field value if set, nil otherwise
+// GetTypeOk returns a tuple with the Type field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Trigger) GetTriggerTypeOk() (*string, bool) {
-	if o == nil || o.TriggerType == nil {
+func (o *Trigger) GetTypeOk() (*string, bool) {
+	if o == nil || isNil(o.Type) {
 		return nil, false
 	}
-	return o.TriggerType, true
+	return o.Type, true
 }
 
-// HasTriggerType returns a boolean if a field has been set.
-func (o *Trigger) HasTriggerType() bool {
-	if o != nil && o.TriggerType != nil {
+// HasType returns a boolean if a field has been set.
+func (o *Trigger) HasType() bool {
+	if o != nil && !isNil(o.Type) {
 		return true
 	}
 
 	return false
 }
 
-// SetTriggerType gets a reference to the given string and assigns it to the TriggerType field.
-func (o *Trigger) SetTriggerType(v string) {
-	o.TriggerType = &v
+// SetType gets a reference to the given string and assigns it to the Type field.
+func (o *Trigger) SetType(v string) {
+	o.Type = &v
 }
 
-// GetTriggerSettings returns the TriggerSettings field value if set, zero value otherwise.
-func (o *Trigger) GetTriggerSettings() TriggerTriggerSettings {
-	if o == nil || o.TriggerSettings == nil {
-		var ret TriggerTriggerSettings
+// GetHttpRequest returns the HttpRequest field value if set, zero value otherwise.
+func (o *Trigger) GetHttpRequest() HTTPRequest {
+	if o == nil || isNil(o.HttpRequest) {
+		var ret HTTPRequest
 		return ret
 	}
-	return *o.TriggerSettings
+	return *o.HttpRequest
 }
 
-// GetTriggerSettingsOk returns a tuple with the TriggerSettings field value if set, nil otherwise
+// GetHttpRequestOk returns a tuple with the HttpRequest field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Trigger) GetTriggerSettingsOk() (*TriggerTriggerSettings, bool) {
-	if o == nil || o.TriggerSettings == nil {
+func (o *Trigger) GetHttpRequestOk() (*HTTPRequest, bool) {
+	if o == nil || isNil(o.HttpRequest) {
 		return nil, false
 	}
-	return o.TriggerSettings, true
+	return o.HttpRequest, true
 }
 
-// HasTriggerSettings returns a boolean if a field has been set.
-func (o *Trigger) HasTriggerSettings() bool {
-	if o != nil && o.TriggerSettings != nil {
+// HasHttpRequest returns a boolean if a field has been set.
+func (o *Trigger) HasHttpRequest() bool {
+	if o != nil && !isNil(o.HttpRequest) {
 		return true
 	}
 
 	return false
 }
 
-// SetTriggerSettings gets a reference to the given TriggerTriggerSettings and assigns it to the TriggerSettings field.
-func (o *Trigger) SetTriggerSettings(v TriggerTriggerSettings) {
-	o.TriggerSettings = &v
+// SetHttpRequest gets a reference to the given HTTPRequest and assigns it to the HttpRequest field.
+func (o *Trigger) SetHttpRequest(v HTTPRequest) {
+	o.HttpRequest = &v
+}
+
+// GetGrpc returns the Grpc field value if set, zero value otherwise.
+func (o *Trigger) GetGrpc() GRPCRequest {
+	if o == nil || isNil(o.Grpc) {
+		var ret GRPCRequest
+		return ret
+	}
+	return *o.Grpc
+}
+
+// GetGrpcOk returns a tuple with the Grpc field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Trigger) GetGrpcOk() (*GRPCRequest, bool) {
+	if o == nil || isNil(o.Grpc) {
+		return nil, false
+	}
+	return o.Grpc, true
+}
+
+// HasGrpc returns a boolean if a field has been set.
+func (o *Trigger) HasGrpc() bool {
+	if o != nil && !isNil(o.Grpc) {
+		return true
+	}
+
+	return false
+}
+
+// SetGrpc gets a reference to the given GRPCRequest and assigns it to the Grpc field.
+func (o *Trigger) SetGrpc(v GRPCRequest) {
+	o.Grpc = &v
+}
+
+// GetTraceid returns the Traceid field value if set, zero value otherwise.
+func (o *Trigger) GetTraceid() TRACEIDRequest {
+	if o == nil || isNil(o.Traceid) {
+		var ret TRACEIDRequest
+		return ret
+	}
+	return *o.Traceid
+}
+
+// GetTraceidOk returns a tuple with the Traceid field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Trigger) GetTraceidOk() (*TRACEIDRequest, bool) {
+	if o == nil || isNil(o.Traceid) {
+		return nil, false
+	}
+	return o.Traceid, true
+}
+
+// HasTraceid returns a boolean if a field has been set.
+func (o *Trigger) HasTraceid() bool {
+	if o != nil && !isNil(o.Traceid) {
+		return true
+	}
+
+	return false
+}
+
+// SetTraceid gets a reference to the given TRACEIDRequest and assigns it to the Traceid field.
+func (o *Trigger) SetTraceid(v TRACEIDRequest) {
+	o.Traceid = &v
+}
+
+// GetKafka returns the Kafka field value if set, zero value otherwise.
+func (o *Trigger) GetKafka() KafkaRequest {
+	if o == nil || isNil(o.Kafka) {
+		var ret KafkaRequest
+		return ret
+	}
+	return *o.Kafka
+}
+
+// GetKafkaOk returns a tuple with the Kafka field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Trigger) GetKafkaOk() (*KafkaRequest, bool) {
+	if o == nil || isNil(o.Kafka) {
+		return nil, false
+	}
+	return o.Kafka, true
+}
+
+// HasKafka returns a boolean if a field has been set.
+func (o *Trigger) HasKafka() bool {
+	if o != nil && !isNil(o.Kafka) {
+		return true
+	}
+
+	return false
+}
+
+// SetKafka gets a reference to the given KafkaRequest and assigns it to the Kafka field.
+func (o *Trigger) SetKafka(v KafkaRequest) {
+	o.Kafka = &v
 }
 
 func (o Trigger) MarshalJSON() ([]byte, error) {
-	toSerialize := map[string]interface{}{}
-	if o.TriggerType != nil {
-		toSerialize["triggerType"] = o.TriggerType
-	}
-	if o.TriggerSettings != nil {
-		toSerialize["triggerSettings"] = o.TriggerSettings
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
 	return json.Marshal(toSerialize)
+}
+
+func (o Trigger) ToMap() (map[string]interface{}, error) {
+	toSerialize := map[string]interface{}{}
+	if !isNil(o.Type) {
+		toSerialize["type"] = o.Type
+	}
+	if !isNil(o.HttpRequest) {
+		toSerialize["httpRequest"] = o.HttpRequest
+	}
+	if !isNil(o.Grpc) {
+		toSerialize["grpc"] = o.Grpc
+	}
+	if !isNil(o.Traceid) {
+		toSerialize["traceid"] = o.Traceid
+	}
+	if !isNil(o.Kafka) {
+		toSerialize["kafka"] = o.Kafka
+	}
+	return toSerialize, nil
 }
 
 type NullableTrigger struct {

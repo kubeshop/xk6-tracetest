@@ -22,6 +22,10 @@ type Output struct {
 var _ output.Output = new(Output)
 
 func New(params output.Params, tracetest *tracetest.Tracetest) (*Output, error) {
+	if tracetest == nil {
+		return nil, fmt.Errorf("tracetest must not be nil")
+	}
+
 	config, err := models.NewConfig(params)
 	if err != nil {
 		return nil, err

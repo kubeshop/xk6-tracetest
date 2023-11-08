@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/dop251/goja v0.0.0-20230531210528-d7324b2d74f7
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	go.k6.io/k6 v0.45.1
 	go.opentelemetry.io/contrib/propagators/aws v1.12.0
@@ -12,7 +13,6 @@ require (
 	go.opentelemetry.io/contrib/propagators/ot v1.12.0
 	go.opentelemetry.io/otel v1.11.2
 	go.opentelemetry.io/otel/trace v1.11.2
-	golang.org/x/oauth2 v0.4.0
 )
 
 require (
@@ -26,7 +26,6 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4-0.20211119122758-180fcef48034+incompatible // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
@@ -50,7 +49,5 @@ require (
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/guregu/null.v3 v3.3.0 // indirect
 )

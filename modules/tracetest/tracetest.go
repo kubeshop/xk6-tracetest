@@ -25,16 +25,19 @@ type Tracetest struct {
 	client          *openapi.APIClient
 	apiOptions      models.ApiOptions
 	mutex           sync.Mutex
+	jwt             string
 }
 
 func New() *Tracetest {
 	logger := *logrus.New()
+	client, jwt := NewAPIClient(models.ApiOptions{})
 	tracetest := &Tracetest{
 		buffer:          []models.Job{},
 		processedBuffer: sync.Map{},
 		logger:          logger.WithField("component", "xk6-tracetest-tracing"),
-		client:          NewAPIClient(models.ApiOptions{}),
+		client:          client,
 		mutex:           sync.Mutex{},
+		jwt:             jwt,
 	}
 
 	duration := 1 * time.Second
@@ -45,12 +48,21 @@ func New() *Tracetest {
 }
 
 func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	if config.ServerUrl == "" {
+		config.ServerUrl = models.DefaultServerUrl
+	}
+
 	apiOptions := models.ApiOptions{
 		ServerUrl:  config.ServerUrl,
 		ServerPath: config.ServerPath,
+		APIToken:   config.APIToken,
 	}
 
-	t.client = NewAPIClient(apiOptions)
+	t.apiOptions = apiOptions
+	t.client, t.jwt = NewAPIClient(apiOptions)
 }
 
 func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
@@ -58,13 +70,6 @@ func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
 	defer t.mutex.Unlock()
 
 	rt := t.Vu.Runtime()
-	apiOptions, err := models.NewApiOptions(t.Vu, call.Argument(0))
-	if err != nil {
-		common.Throw(rt, err)
-	}
-
-	t.apiOptions = apiOptions
-	t.client = NewAPIClient(apiOptions)
 
 	return rt.ToValue(t).ToObject(rt)
 }

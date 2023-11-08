@@ -6,20 +6,30 @@ export const options = {
   duration: "5s",
 };
 
-const http = new Http({ propagator: ["b3"] });
+const http = new Http();
 const testId = "J0d887oVR";
-const tracetest = Tracetest({
-  serverUrl: "http://localhost:3000",
+const tracetest = Tracetest();
+
+tracetest.updateFromConfig({
+  server_url: "http://localhost:11633",
 });
 
 export default function () {
   const url = "http://localhost:8081/pokemon?take=5";
   const response = http.get(url);
-  tracetest.runTest(testId, response.trace_id, true, {
-    id: "123",
-    url,
-    method: "GET",
-  });
+  tracetest.runTest(
+    response.trace_id,
+    {
+      test_id: testId,
+      should_wait: true,
+      variable_name: "TRACE_ID",
+    },
+    {
+      id: "123",
+      url,
+      method: "GET",
+    }
+  );
 
   sleep(1);
 }

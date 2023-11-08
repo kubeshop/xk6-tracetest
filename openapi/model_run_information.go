@@ -14,11 +14,15 @@ import (
 	"encoding/json"
 )
 
+// checks if the RunInformation type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &RunInformation{}
+
 // RunInformation struct for RunInformation
 type RunInformation struct {
 	Metadata      map[string]string  `json:"metadata,omitempty"`
-	EnvironmentId *string            `json:"environmentId,omitempty"`
-	Variables     []EnvironmentValue `json:"variables,omitempty"`
+	VariableSetId *string            `json:"variableSetId,omitempty"`
+	Variables     []VariableSetValue `json:"variables,omitempty"`
+	RequiredGates []SupportedGates   `json:"requiredGates,omitempty"`
 }
 
 // NewRunInformation instantiates a new RunInformation object
@@ -51,7 +55,7 @@ func (o *RunInformation) GetMetadata() map[string]string {
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *RunInformation) GetMetadataOk() (*map[string]string, bool) {
-	if o == nil || o.Metadata == nil {
+	if o == nil || isNil(o.Metadata) {
 		return nil, false
 	}
 	return &o.Metadata, true
@@ -59,7 +63,7 @@ func (o *RunInformation) GetMetadataOk() (*map[string]string, bool) {
 
 // HasMetadata returns a boolean if a field has been set.
 func (o *RunInformation) HasMetadata() bool {
-	if o != nil && o.Metadata != nil {
+	if o != nil && isNil(o.Metadata) {
 		return true
 	}
 
@@ -71,42 +75,42 @@ func (o *RunInformation) SetMetadata(v map[string]string) {
 	o.Metadata = v
 }
 
-// GetEnvironmentId returns the EnvironmentId field value if set, zero value otherwise.
-func (o *RunInformation) GetEnvironmentId() string {
-	if o == nil || o.EnvironmentId == nil {
+// GetVariableSetId returns the VariableSetId field value if set, zero value otherwise.
+func (o *RunInformation) GetVariableSetId() string {
+	if o == nil || isNil(o.VariableSetId) {
 		var ret string
 		return ret
 	}
-	return *o.EnvironmentId
+	return *o.VariableSetId
 }
 
-// GetEnvironmentIdOk returns a tuple with the EnvironmentId field value if set, nil otherwise
+// GetVariableSetIdOk returns a tuple with the VariableSetId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RunInformation) GetEnvironmentIdOk() (*string, bool) {
-	if o == nil || o.EnvironmentId == nil {
+func (o *RunInformation) GetVariableSetIdOk() (*string, bool) {
+	if o == nil || isNil(o.VariableSetId) {
 		return nil, false
 	}
-	return o.EnvironmentId, true
+	return o.VariableSetId, true
 }
 
-// HasEnvironmentId returns a boolean if a field has been set.
-func (o *RunInformation) HasEnvironmentId() bool {
-	if o != nil && o.EnvironmentId != nil {
+// HasVariableSetId returns a boolean if a field has been set.
+func (o *RunInformation) HasVariableSetId() bool {
+	if o != nil && !isNil(o.VariableSetId) {
 		return true
 	}
 
 	return false
 }
 
-// SetEnvironmentId gets a reference to the given string and assigns it to the EnvironmentId field.
-func (o *RunInformation) SetEnvironmentId(v string) {
-	o.EnvironmentId = &v
+// SetVariableSetId gets a reference to the given string and assigns it to the VariableSetId field.
+func (o *RunInformation) SetVariableSetId(v string) {
+	o.VariableSetId = &v
 }
 
 // GetVariables returns the Variables field value if set, zero value otherwise.
-func (o *RunInformation) GetVariables() []EnvironmentValue {
-	if o == nil || o.Variables == nil {
-		var ret []EnvironmentValue
+func (o *RunInformation) GetVariables() []VariableSetValue {
+	if o == nil || isNil(o.Variables) {
+		var ret []VariableSetValue
 		return ret
 	}
 	return o.Variables
@@ -114,8 +118,8 @@ func (o *RunInformation) GetVariables() []EnvironmentValue {
 
 // GetVariablesOk returns a tuple with the Variables field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RunInformation) GetVariablesOk() ([]EnvironmentValue, bool) {
-	if o == nil || o.Variables == nil {
+func (o *RunInformation) GetVariablesOk() ([]VariableSetValue, bool) {
+	if o == nil || isNil(o.Variables) {
 		return nil, false
 	}
 	return o.Variables, true
@@ -123,30 +127,74 @@ func (o *RunInformation) GetVariablesOk() ([]EnvironmentValue, bool) {
 
 // HasVariables returns a boolean if a field has been set.
 func (o *RunInformation) HasVariables() bool {
-	if o != nil && o.Variables != nil {
+	if o != nil && !isNil(o.Variables) {
 		return true
 	}
 
 	return false
 }
 
-// SetVariables gets a reference to the given []EnvironmentValue and assigns it to the Variables field.
-func (o *RunInformation) SetVariables(v []EnvironmentValue) {
+// SetVariables gets a reference to the given []VariableSetValue and assigns it to the Variables field.
+func (o *RunInformation) SetVariables(v []VariableSetValue) {
 	o.Variables = v
 }
 
+// GetRequiredGates returns the RequiredGates field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *RunInformation) GetRequiredGates() []SupportedGates {
+	if o == nil {
+		var ret []SupportedGates
+		return ret
+	}
+	return o.RequiredGates
+}
+
+// GetRequiredGatesOk returns a tuple with the RequiredGates field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *RunInformation) GetRequiredGatesOk() ([]SupportedGates, bool) {
+	if o == nil || isNil(o.RequiredGates) {
+		return nil, false
+	}
+	return o.RequiredGates, true
+}
+
+// HasRequiredGates returns a boolean if a field has been set.
+func (o *RunInformation) HasRequiredGates() bool {
+	if o != nil && isNil(o.RequiredGates) {
+		return true
+	}
+
+	return false
+}
+
+// SetRequiredGates gets a reference to the given []SupportedGates and assigns it to the RequiredGates field.
+func (o *RunInformation) SetRequiredGates(v []SupportedGates) {
+	o.RequiredGates = v
+}
+
 func (o RunInformation) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
+func (o RunInformation) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	if o.EnvironmentId != nil {
-		toSerialize["environmentId"] = o.EnvironmentId
+	if !isNil(o.VariableSetId) {
+		toSerialize["variableSetId"] = o.VariableSetId
 	}
-	if o.Variables != nil {
+	if !isNil(o.Variables) {
 		toSerialize["variables"] = o.Variables
 	}
-	return json.Marshal(toSerialize)
+	if o.RequiredGates != nil {
+		toSerialize["requiredGates"] = o.RequiredGates
+	}
+	return toSerialize, nil
 }
 
 type NullableRunInformation struct {

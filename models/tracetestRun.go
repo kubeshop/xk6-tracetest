@@ -17,7 +17,7 @@ type TracetestRun struct {
 }
 
 func (tr *TracetestRun) Summary(baseUrl string) string {
-	runUrl := fmt.Sprintf("%s/test/%s/run/%s", baseUrl, tr.TestId, *tr.TestRun.Id)
+	runUrl := fmt.Sprintf("%s/test/%s/run/%d", baseUrl, tr.TestId, *tr.TestRun.Id)
 
 	failingSpecs := true
 	if tr.TestRun != nil && tr.TestRun.Result != nil && tr.TestRun.Result.AllPassed != nil {
