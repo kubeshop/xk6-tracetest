@@ -12,7 +12,7 @@ const tracetest = Tracetest();
 
 tracetest.updateFromConfig({
   server_url: "http://localhost:11633",
-})
+});
 
 export default function () {
   const url = "http://localhost:8081/pokemon?take=5";
@@ -21,6 +21,8 @@ export default function () {
     response.trace_id,
     {
       test_id: testId,
+      should_wait: true,
+      variable_name: "TRACE_ID",
     },
     {
       id: "123",
