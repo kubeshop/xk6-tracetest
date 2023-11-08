@@ -47,6 +47,11 @@ func New() *Tracetest {
 func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
+
+	if config.ServerUrl == "" {
+		config.ServerUrl = models.DefaultServerUrl
+	}
+
 	apiOptions := models.ApiOptions{
 		ServerUrl:  config.ServerUrl,
 		ServerPath: config.ServerPath,

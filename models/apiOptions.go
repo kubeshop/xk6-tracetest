@@ -15,7 +15,7 @@ type ApiOptions struct {
 }
 
 const (
-	DefaultServerUrl = "http://localhost:3000"
+	DefaultServerUrl = "https://app.tracetest.io"
 	ServerURL        = "serverUrl"
 	ServerPath       = "serverPath"
 	APIToken         = "apiToken"

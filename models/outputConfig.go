@@ -23,6 +23,8 @@ func NewConfig(params output.Params) (OutputConfig, error) {
 		cfg.ServerUrl = params.ConfigArgument
 	} else if val, ok := params.Environment[ENV_SERVER_URL]; ok {
 		cfg.ServerUrl = val
+	} else {
+		cfg.ServerUrl = DefaultServerUrl
 	}
 
 	if val, ok := params.Environment[ENV_SERVER_PATH]; ok {

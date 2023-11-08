@@ -10,7 +10,6 @@ const http = new Http();
 const testId = "c80sJ_4SR";
 const tracetest = Tracetest();
 tracetest.updateFromConfig({
-  server_url: "https://app.tracetest.io",
   api_token: "your-api-token",
 });
 
