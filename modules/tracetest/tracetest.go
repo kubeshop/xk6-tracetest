@@ -25,16 +25,19 @@ type Tracetest struct {
 	client          *openapi.APIClient
 	apiOptions      models.ApiOptions
 	mutex           sync.Mutex
+	jwt             string
 }
 
 func New() *Tracetest {
 	logger := *logrus.New()
+	client, jwt := NewAPIClient(models.ApiOptions{})
 	tracetest := &Tracetest{
 		buffer:          []models.Job{},
 		processedBuffer: sync.Map{},
 		logger:          logger.WithField("component", "xk6-tracetest-tracing"),
-		client:          NewAPIClient(models.ApiOptions{}),
+		client:          client,
 		mutex:           sync.Mutex{},
+		jwt:             jwt,
 	}
 
 	duration := 1 * time.Second
@@ -59,7 +62,7 @@ func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
 	}
 
 	t.apiOptions = apiOptions
-	t.client = NewAPIClient(apiOptions)
+	t.client, t.jwt = NewAPIClient(apiOptions)
 }
 
 func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {

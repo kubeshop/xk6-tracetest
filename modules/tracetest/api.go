@@ -10,11 +10,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/kubeshop/xk6-tracetest/models"
 	"github.com/kubeshop/xk6-tracetest/openapi"
 )
 
-func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
+func NewAPIClient(options models.ApiOptions) (*openapi.APIClient, string) {
 	url, err := url.Parse(options.ServerUrl)
 
 	if err != nil {
@@ -25,6 +26,7 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 	config.Host = url.Host
 	config.Scheme = url.Scheme
 
+	jwt := ""
 	if options.APIToken != "" {
 		version, err := getVersion(url)
 		if err != nil {
@@ -36,7 +38,7 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 			panic(err)
 		}
 
-		jwt, err := getJWTFromToken(url, options.APIToken)
+		jwt, err = getJWTFromToken(url, options.APIToken)
 		if err != nil {
 			panic(err)
 		}
@@ -55,7 +57,7 @@ func NewAPIClient(options models.ApiOptions) *openapi.APIClient {
 		}
 	}
 
-	return openapi.NewAPIClient(config)
+	return openapi.NewAPIClient(config), jwt
 }
 
 func getVersion(url *url.URL) (*openapi.Version, error) {
@@ -117,6 +119,20 @@ func getJWTFromToken(url *url.URL, token string) (string, error) {
 	}
 
 	return respJson.JWT, nil
+}
+
+func getTokenClaims(tokenString string) (jwt.MapClaims, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return jwt.MapClaims{}, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return jwt.MapClaims{}, fmt.Errorf("invalid token claims")
+	}
+
+	return claims, nil
 }
 
 func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
@@ -212,6 +228,20 @@ func (t *Tracetest) jobSummary() (successfulJobs, failedJobs []models.Job) {
 	return
 }
 
+func (t *Tracetest) getBaseUrl() string {
+	base := t.apiOptions.ServerUrl
+
+	if t.jwt != "" {
+		claims, _ := getTokenClaims(t.jwt)
+		organizationId := claims["organization_id"].(string)
+		environmentId := claims["environment_id"].(string)
+
+		return fmt.Sprintf("%s/organizations/%s/environments/%s", base, organizationId, environmentId)
+	}
+
+	return base
+}
+
 func (t *Tracetest) stringSummary() string {
 	successfulJobs, failedJobs := t.jobSummary()
 	failedSummary := "[FAILED] \n"
@@ -220,12 +250,14 @@ func (t *Tracetest) stringSummary() string {
 	failedRuns := len(failedJobs)
 	successfulRuns := len(successfulJobs)
 
+	baseUrl := t.getBaseUrl()
+
 	for _, job := range failedJobs {
-		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
+		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
 	}
 
 	for _, job := range successfulJobs {
-		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(t.apiOptions.ServerUrl))
+		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
 	}
 
 	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", totalRuns, successfulRuns, failedRuns)

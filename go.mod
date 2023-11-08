@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/dop251/goja v0.0.0-20230531210528-d7324b2d74f7
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	go.k6.io/k6 v0.45.1
 	go.opentelemetry.io/contrib/propagators/aws v1.12.0
