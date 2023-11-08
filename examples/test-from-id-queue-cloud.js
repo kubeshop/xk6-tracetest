@@ -11,7 +11,7 @@ const testId = "c80sJ_4SR";
 const tracetest = Tracetest();
 tracetest.updateFromConfig({
   server_url: "https://app.tracetest.io",
-  api_token: "tttoken_21a387236e892554",
+  api_token: "your-api-token",
 });
 
 export default function () {
