@@ -3,7 +3,8 @@ package models
 import (
 	"fmt"
 
-	"github.com/kubeshop/xk6-tracetest/openapi"
+	"github.com/kubeshop/tracetest/cli/openapi"
+	"github.com/kubeshop/tracetest/server/pkg/id"
 )
 
 type JobType string
@@ -22,9 +23,11 @@ const (
 )
 
 type Job struct {
+	ID               string
 	TraceID          string
 	TestID           string
 	VariableName     string
+	RunGroupId       string
 	JobType          JobType
 	Request          Request
 	Run              *TracetestRun
@@ -35,13 +38,14 @@ type Job struct {
 
 func NewJob(traceId string, options TracetestOptions, request Request) Job {
 	return Job{
-		JobType:   RunTestFromId,
-		Request:   request,
-		JobStatus: Pending,
-
+		JobType:          RunTestFromId,
+		Request:          request,
+		JobStatus:        Pending,
+		ID:               id.GenerateID().String(),
 		TraceID:          traceId,
 		TestID:           options.TestID,
 		TracetestOptions: options,
+		RunGroupId:       options.RunGroupId,
 	}
 }
 

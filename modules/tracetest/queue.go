@@ -32,14 +32,10 @@ func (t *Tracetest) parallelJobProcessor(jobs []models.Job) {
 		go func(job models.Job) {
 			defer waitGroup.Done()
 
-			run, err := t.runTest(job)
+			run, err := t.runTest(&job)
 			job = job.HandleRunResponse(run, err)
-			if job.TracetestOptions.ShouldWait && run != nil {
-				run, err := t.waitForTestResult(job.TestID, *run.Id)
-				job = job.HandleRunResponse(&run, err)
-			}
 
-			t.processedBuffer.Store(job.Request.ID, job)
+			t.processedBuffer.Store(job.ID, job)
 		}(job)
 	}
 }

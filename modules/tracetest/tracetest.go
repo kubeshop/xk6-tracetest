@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
+	"github.com/kubeshop/tracetest/cli/openapi"
+	"github.com/kubeshop/tracetest/server/pkg/id"
 	"github.com/kubeshop/xk6-tracetest/models"
-	"github.com/kubeshop/xk6-tracetest/openapi"
 	"github.com/sirupsen/logrus"
 	"go.k6.io/k6/js/common"
 	"go.k6.io/k6/js/modules"
@@ -19,6 +20,7 @@ type Tracetest struct {
 	Vu              modules.VU
 	bufferLock      sync.Mutex
 	buffer          []models.Job
+	runGroupId      string
 	processedBuffer sync.Map
 	periodicFlusher *output.PeriodicFlusher
 	logger          logrus.FieldLogger
@@ -38,6 +40,7 @@ func New() *Tracetest {
 		client:          client,
 		mutex:           sync.Mutex{},
 		jwt:             jwt,
+		runGroupId:      id.GenerateID().String(),
 	}
 
 	duration := 1 * time.Second
@@ -75,21 +78,21 @@ func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
 }
 
 func (t *Tracetest) RunTest(traceID string, options models.TracetestOptions, request models.Request) {
+	if options.RunGroupId == "" {
+		options.RunGroupId = t.runGroupId
+	}
+
 	t.queueJob(models.NewJob(traceID, options, request))
 }
 
 func (t *Tracetest) Summary() string {
-	if len(t.buffer) != 0 {
-		t.processQueue()
-	}
+	t.wait()
 
 	return t.stringSummary()
 }
 
 func (t *Tracetest) ValidateResult() {
-	if len(t.buffer) != 0 {
-		t.processQueue()
-	}
+	t.wait()
 
 	_, failedJobs := t.jobSummary()
 
@@ -99,6 +102,8 @@ func (t *Tracetest) ValidateResult() {
 }
 
 func (t *Tracetest) Json() string {
+	t.wait()
+
 	rt := t.Vu.Runtime()
 	jsonString, err := json.Marshal(t.jsonSummary())
 
@@ -107,4 +112,12 @@ func (t *Tracetest) Json() string {
 	}
 
 	return string(jsonString)
+}
+
+func (t *Tracetest) wait() {
+	if len(t.buffer) != 0 {
+		t.processQueue()
+	}
+
+	t.waitForRunGroup(t.runGroupId)
 }
