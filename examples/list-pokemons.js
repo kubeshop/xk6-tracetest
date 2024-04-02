@@ -29,6 +29,6 @@ export default function () {
 
 export function handleSummary() {
   return {
-    stdout: tracetest.summary(),
+    stdout: tracetest.json(),
   };
 }

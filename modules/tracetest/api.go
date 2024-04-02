@@ -248,7 +248,7 @@ func (t *Tracetest) getIsRunGroupReady(ctx context.Context, runGroupId string) (
 	return nil, nil
 }
 
-func (t *Tracetest) jobSummary() (successfulJobs, failedJobs []models.Job) {
+func (t *Tracetest) jobSummary() (jobs []models.Job) {
 	t.processedBuffer.Range(func(_, value interface{}) bool {
 		if job, ok := value.(models.Job); ok {
 			req := t.client.ApiApi.GetTestRun(context.Background(), job.TestID, job.Run.TestRun.GetId())
@@ -259,12 +259,7 @@ func (t *Tracetest) jobSummary() (successfulJobs, failedJobs []models.Job) {
 			}
 
 			job.Run.TestRun = run
-
-			if job.IsSuccessful() {
-				successfulJobs = append(successfulJobs, job)
-			} else {
-				failedJobs = append(failedJobs, job)
-			}
+			jobs = append(jobs, job)
 		}
 
 		return true
@@ -287,50 +282,41 @@ func (t *Tracetest) getBaseUrl() string {
 	return base
 }
 
-func (t *Tracetest) stringSummary() string {
-	successfulJobs, failedJobs := t.jobSummary()
-	failedSummary := "[FAILED] \n"
-	successfulSummary := "[SUCCESSFUL] \n"
-	totalRuns := len(successfulJobs) + len(failedJobs)
-	failedRuns := len(failedJobs)
-	successfulRuns := len(successfulJobs)
-
+func (t *Tracetest) stringSummary(runGroup openapi.RunGroup) string {
+	jobs := t.jobSummary()
+	stringSummary := ""
 	baseUrl := t.getBaseUrl()
 
-	for _, job := range failedJobs {
-		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
+	for _, job := range jobs {
+		stringSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
 	}
 
-	for _, job := range successfulJobs {
-		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
-	}
+	summary := runGroup.GetSummary()
 
-	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", totalRuns, successfulRuns, failedRuns)
+	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", summary.GetSucceed()+summary.GetFailed(), summary.GetSucceed(), summary.GetFailed())
+	runGroupResult := fmt.Sprintf("[RunGroup=#%s, Status=%s] - %s/run/%s \n", runGroup.GetId(), runGroup.GetStatus(), baseUrl, runGroup.GetId())
 
-	if failedRuns == 0 {
-		failedSummary = ""
-	}
-
-	if successfulRuns == 0 {
-		successfulSummary = ""
-	}
-
-	return totalResults + failedSummary + successfulSummary
+	return runGroupResult + totalResults + stringSummary
 }
 
 type JsonResult struct {
 	TotalRuns      int
 	SuccessfulRuns int
 	FailedRuns     int
+	RunGroup       openapi.RunGroup
+	RunGroupUrl    string
 	Failed         []models.Job
 	Successful     []models.Job
 }
 
-func (t *Tracetest) jsonSummary() JsonResult {
+func (t *Tracetest) jsonSummary(runGroup openapi.RunGroup) JsonResult {
+	baseUrl := t.getBaseUrl()
 	JsonResult := JsonResult{
 		TotalRuns:      0,
 		SuccessfulRuns: 0,
 		FailedRuns:     0,
+		RunGroup:       runGroup,
+		RunGroupUrl:    fmt.Sprintf("%s/run/%s", baseUrl, runGroup.GetId()),
 		Failed:         []models.Job{},
 		Successful:     []models.Job{},
 	}

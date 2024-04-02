@@ -86,26 +86,26 @@ func (t *Tracetest) RunTest(traceID string, options models.TracetestOptions, req
 }
 
 func (t *Tracetest) Summary() string {
-	t.wait()
+	runGroup, _ := t.wait()
 
-	return t.stringSummary()
+	return t.stringSummary(runGroup)
 }
 
 func (t *Tracetest) ValidateResult() {
-	t.wait()
+	runGroup, _ := t.wait()
 
-	_, failedJobs := t.jobSummary()
+	summary := runGroup.GetSummary()
 
-	if len(failedJobs) > 0 {
-		panic(fmt.Sprintf("Tracetest: %d jobs failed", len(failedJobs)))
+	if summary.GetFailed() > 0 {
+		panic(fmt.Sprintf("Tracetest: %d jobs failed", summary.GetFailed()))
 	}
 }
 
 func (t *Tracetest) Json() string {
-	t.wait()
+	runGroup, _ := t.wait()
 
 	rt := t.Vu.Runtime()
-	jsonString, err := json.Marshal(t.jsonSummary())
+	jsonString, err := json.Marshal(t.jsonSummary(runGroup))
 
 	if err != nil {
 		common.Throw(rt, err)
@@ -114,10 +114,10 @@ func (t *Tracetest) Json() string {
 	return string(jsonString)
 }
 
-func (t *Tracetest) wait() {
+func (t *Tracetest) wait() (openapi.RunGroup, error) {
 	if len(t.buffer) != 0 {
 		t.processQueue()
 	}
 
-	t.waitForRunGroup(t.runGroupId)
+	return t.waitForRunGroup(t.runGroupId)
 }

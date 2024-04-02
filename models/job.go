@@ -5,6 +5,7 @@ import (
 
 	"github.com/kubeshop/tracetest/cli/openapi"
 	"github.com/kubeshop/tracetest/server/pkg/id"
+	"github.com/kubeshop/xk6-tracetest/modules/metadata"
 )
 
 type JobType string
@@ -34,6 +35,7 @@ type Job struct {
 	JobStatus        JobStatus
 	TracetestOptions TracetestOptions
 	Error            string
+	Metadata         metadata.Metadata
 }
 
 func NewJob(traceId string, options TracetestOptions, request Request) Job {
@@ -46,6 +48,7 @@ func NewJob(traceId string, options TracetestOptions, request Request) Job {
 		TestID:           options.TestID,
 		TracetestOptions: options,
 		RunGroupId:       options.RunGroupId,
+		Metadata:         metadata.GetMetadata(),
 	}
 }
 
@@ -70,7 +73,12 @@ func (job Job) Summary(baseUrl string) string {
 		runSummary = job.Run.Summary(baseUrl)
 	}
 
-	return fmt.Sprintf("Request=%s - %s, TraceID=%s, %s", job.Request.Method, job.Request.URL, job.TraceID, runSummary)
+	status := "FAILED"
+	if job.IsSuccessful() {
+		status = "SUCCESS"
+	}
+
+	return fmt.Sprintf("%s Request=%s - %s, TraceID=%s, %s", status, job.Request.Method, job.Request.URL, job.TraceID, runSummary)
 }
 
 func (job Job) IsSuccessful() bool {
