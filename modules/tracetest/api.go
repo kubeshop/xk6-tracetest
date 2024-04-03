@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/kubeshop/tracetest/cli/openapi"
 	"github.com/kubeshop/xk6-tracetest/models"
+	"sigs.k8s.io/yaml"
 )
 
 var (
@@ -153,17 +154,30 @@ func getTokenClaims(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func (t *Tracetest) upsertTest(ctx context.Context) (*openapi.TestResource, error) {
+func (t *Tracetest) upsertTest(ctx context.Context, definition string) (*openapi.TestResource, error) {
 	req := t.client.ResourceApiApi.UpsertTest(ctx)
-	req = req.TestResource(defaultTest)
+	raw := defaultTest
 
+	if definition != "" {
+		rawJson, err := yaml.YAMLToJSON([]byte(definition))
+		if err != nil {
+			return nil, fmt.Errorf("could not parse YAML to JSON: %w", err)
+		}
+
+		err = json.Unmarshal(rawJson, &raw)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarshal definition: %w", err)
+		}
+	}
+
+	req = req.TestResource(raw)
 	test, _, err := t.client.ResourceApiApi.UpsertTestExecute(req)
 	return test, err
 }
 
 func (t *Tracetest) runTest(job *models.Job) (*openapi.TestRun, error) {
 	if job.TestID == "" {
-		_, err := t.upsertTest(context.Background())
+		_, err := t.upsertTest(context.Background(), job.Definition)
 		if err != nil {
 			return nil, fmt.Errorf("could not create test: %w", err)
 		}

@@ -36,6 +36,7 @@ type Job struct {
 	TracetestOptions TracetestOptions
 	Error            string
 	Metadata         metadata.Metadata
+	Definition       string
 }
 
 func NewJob(traceId string, options TracetestOptions, request Request) Job {
@@ -49,6 +50,7 @@ func NewJob(traceId string, options TracetestOptions, request Request) Job {
 		TracetestOptions: options,
 		RunGroupId:       options.RunGroupId,
 		Metadata:         metadata.GetMetadata(),
+		Definition:       options.Definition,
 	}
 }
 

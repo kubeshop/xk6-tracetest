@@ -9,6 +9,7 @@ type TracetestOptions struct {
 	ShouldWait   bool
 	VariableName string
 	RunGroupId   string
+	Definition   string
 }
 
 func NewTracetestOptions(runTime *goja.Runtime, params *goja.Object) TracetestOptions {
@@ -27,6 +28,8 @@ func NewTracetestOptions(runTime *goja.Runtime, params *goja.Object) TracetestOp
 		switch key {
 		case "testId":
 			options.TestID = optionsObject.Get(key).String()
+		case "definition":
+			options.Definition = optionsObject.Get(key).String()
 		case "shouldWait":
 			options.ShouldWait = optionsObject.Get(key).ToBoolean()
 		case "variableName":
