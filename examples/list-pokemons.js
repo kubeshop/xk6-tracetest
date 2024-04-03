@@ -45,3 +45,7 @@ export function handleSummary() {
     stdout: tracetest.summary(),
   };
 }
+
+export function teardown() {
+  tracetest.validateResult();
+}
