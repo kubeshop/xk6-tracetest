@@ -8,6 +8,7 @@ type TracetestOptions struct {
 	TestID       string
 	ShouldWait   bool
 	VariableName string
+	RunGroupId   string
 }
 
 func NewTracetestOptions(runTime *goja.Runtime, params *goja.Object) TracetestOptions {

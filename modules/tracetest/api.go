@@ -11,8 +11,26 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/kubeshop/tracetest/cli/openapi"
 	"github.com/kubeshop/xk6-tracetest/models"
-	"github.com/kubeshop/xk6-tracetest/openapi"
+)
+
+var (
+	traceID      = "TRACE_ID"
+	resourceType = "Test"
+	testName     = "K6 Test"
+	testID       = "k6-test"
+	testTrigger  = "k6"
+	defaultTest  = openapi.TestResource{
+		Type: &resourceType,
+		Spec: &openapi.Test{
+			Id:   &testID,
+			Name: &testName,
+			Trigger: &openapi.Trigger{
+				Type: &testTrigger,
+			},
+		},
+	}
 )
 
 func NewAPIClient(options models.ApiOptions) (*openapi.APIClient, string) {
@@ -135,11 +153,29 @@ func getTokenClaims(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
+func (t *Tracetest) upsertTest(ctx context.Context) (*openapi.TestResource, error) {
+	req := t.client.ResourceApiApi.UpsertTest(ctx)
+	req = req.TestResource(defaultTest)
+
+	test, _, err := t.client.ResourceApiApi.UpsertTestExecute(req)
+	return test, err
+}
+
+func (t *Tracetest) runTest(job *models.Job) (*openapi.TestRun, error) {
+	if job.TestID == "" {
+		_, err := t.upsertTest(context.Background())
+		if err != nil {
+			return nil, fmt.Errorf("could not create test: %w", err)
+		}
+
+		job.TestID = testID
+	}
+
 	request := t.client.ApiApi.RunTest(context.Background(), job.TestID)
 	request = request.RunInformation(openapi.RunInformation{
+		RunGroupId: &job.RunGroupId,
 		Variables: []openapi.VariableSetValue{{
-			Key:   &job.TracetestOptions.VariableName,
+			Key:   &traceID,
 			Value: &job.TraceID,
 		}},
 		Metadata: job.Request.Metadata,
@@ -159,9 +195,9 @@ func (t *Tracetest) runTest(job models.Job) (*openapi.TestRun, error) {
 	return run, nil
 }
 
-func (t *Tracetest) waitForTestResult(testID string, testRunID int32) (openapi.TestRun, error) {
+func (t *Tracetest) waitForRunGroup(runGroupId string) (openapi.RunGroup, error) {
 	var (
-		testRun   openapi.TestRun
+		runGroup  openapi.RunGroup
 		lastError error
 		wg        sync.WaitGroup
 	)
@@ -173,15 +209,15 @@ func (t *Tracetest) waitForTestResult(testID string, testRunID int32) (openapi.T
 		for {
 			select {
 			case <-ticker.C:
-				readyTestRun, err := t.getIsTestReady(context.Background(), testID, testRunID)
+				readyGroup, err := t.getIsRunGroupReady(context.Background(), runGroupId)
 				if err != nil {
 					lastError = err
 					wg.Done()
 					return
 				}
 
-				if readyTestRun != nil {
-					testRun = *readyTestRun
+				if readyGroup != nil {
+					runGroup = *readyGroup
 					wg.Done()
 					return
 				}
@@ -191,35 +227,39 @@ func (t *Tracetest) waitForTestResult(testID string, testRunID int32) (openapi.T
 	wg.Wait()
 
 	if lastError != nil {
-		return openapi.TestRun{}, lastError
+		return openapi.RunGroup{}, lastError
 	}
 
-	return testRun, nil
+	return runGroup, nil
 }
 
-func (t *Tracetest) getIsTestReady(ctx context.Context, testID string, testRunId int32) (*openapi.TestRun, error) {
-	req := t.client.ApiApi.GetTestRun(ctx, testID, testRunId)
-	run, _, err := t.client.ApiApi.GetTestRunExecute(req)
+func (t *Tracetest) getIsRunGroupReady(ctx context.Context, runGroupId string) (*openapi.RunGroup, error) {
+	req := t.client.ApiApi.GetRunGroup(ctx, runGroupId)
+	runGroup, _, err := t.client.ApiApi.GetRunGroupExecute(req)
 
 	if err != nil {
-		return &openapi.TestRun{}, fmt.Errorf("could not execute GetTestRun request: %w", err)
+		return &openapi.RunGroup{}, fmt.Errorf("could not execute GetTestRun request: %w", err)
 	}
 
-	if isStateFailed(*run.State) || isStateFinished(*run.State) {
-		return run, nil
+	if isRunGroupDone(*runGroup.Status) {
+		return runGroup, nil
 	}
 
 	return nil, nil
 }
 
-func (t *Tracetest) jobSummary() (successfulJobs, failedJobs []models.Job) {
+func (t *Tracetest) jobSummary() (jobs []models.Job) {
 	t.processedBuffer.Range(func(_, value interface{}) bool {
 		if job, ok := value.(models.Job); ok {
-			if job.IsSuccessful() {
-				successfulJobs = append(successfulJobs, job)
-			} else {
-				failedJobs = append(failedJobs, job)
+			req := t.client.ApiApi.GetTestRun(context.Background(), job.TestID, job.Run.TestRun.GetId())
+			run, _, err := t.client.ApiApi.GetTestRunExecute(req)
+			if err != nil {
+				t.logger.Errorf("could not get test run: %s", err)
+				return false
 			}
+
+			job.Run.TestRun = run
+			jobs = append(jobs, job)
 		}
 
 		return true
@@ -242,56 +282,56 @@ func (t *Tracetest) getBaseUrl() string {
 	return base
 }
 
-func (t *Tracetest) stringSummary() string {
-	successfulJobs, failedJobs := t.jobSummary()
-	failedSummary := "[FAILED] \n"
-	successfulSummary := "[SUCCESSFUL] \n"
-	totalRuns := len(successfulJobs) + len(failedJobs)
-	failedRuns := len(failedJobs)
-	successfulRuns := len(successfulJobs)
-
+func (t *Tracetest) stringSummary(runGroup openapi.RunGroup) string {
+	jobs := t.jobSummary()
+	stringSummary := ""
 	baseUrl := t.getBaseUrl()
 
-	for _, job := range failedJobs {
-		failedSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
+	for _, job := range jobs {
+		stringSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
 	}
 
-	for _, job := range successfulJobs {
-		successfulSummary += fmt.Sprintf("[%s] \n", job.Summary(baseUrl))
-	}
+	summary := runGroup.GetSummary()
 
-	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", totalRuns, successfulRuns, failedRuns)
+	totalResults := fmt.Sprintf("[TotalRuns=%d, SuccessfulRus=%d, FailedRuns=%d] \n", summary.GetSucceed()+summary.GetFailed(), summary.GetSucceed(), summary.GetFailed())
+	runGroupResult := fmt.Sprintf("[RunGroup=#%s, Status=%s] - %s/run/%s \n", runGroup.GetId(), runGroup.GetStatus(), baseUrl, runGroup.GetId())
 
-	if failedRuns == 0 {
-		failedSummary = ""
-	}
-
-	if successfulRuns == 0 {
-		successfulSummary = ""
-	}
-
-	return totalResults + failedSummary + successfulSummary
+	return runGroupResult + totalResults + stringSummary
 }
 
 type JsonResult struct {
 	TotalRuns      int
 	SuccessfulRuns int
 	FailedRuns     int
+	RunGroup       openapi.RunGroup
+	RunGroupUrl    string
 	Failed         []models.Job
 	Successful     []models.Job
 }
 
-func (t *Tracetest) jsonSummary() JsonResult {
+func (t *Tracetest) jsonSummary(runGroup openapi.RunGroup) JsonResult {
+	baseUrl := t.getBaseUrl()
 	JsonResult := JsonResult{
 		TotalRuns:      0,
 		SuccessfulRuns: 0,
 		FailedRuns:     0,
+		RunGroup:       runGroup,
+		RunGroupUrl:    fmt.Sprintf("%s/run/%s", baseUrl, runGroup.GetId()),
 		Failed:         []models.Job{},
 		Successful:     []models.Job{},
 	}
 
 	t.processedBuffer.Range(func(_, value interface{}) bool {
 		if job, ok := value.(models.Job); ok {
+			req := t.client.ApiApi.GetTestRun(context.Background(), job.TestID, job.Run.TestRun.GetId())
+			run, _, err := t.client.ApiApi.GetTestRunExecute(req)
+			if err != nil {
+				t.logger.Errorf("could not get test run: %s", err)
+				return false
+			}
+
+			job.Run.TestRun = run
+
 			JsonResult.TotalRuns += 1
 			if job.IsSuccessful() {
 				JsonResult.Successful = append(JsonResult.Successful, job)
@@ -308,14 +348,6 @@ func (t *Tracetest) jsonSummary() JsonResult {
 	return JsonResult
 }
 
-func isStateFinished(state string) bool {
-	return isStateFailed(state) || state == "FINISHED"
-}
-
-func isStateFailed(state string) bool {
-	return state == "TRIGGER_FAILED" ||
-		state == "TRACE_FAILED" ||
-		state == "ASSERTION_FAILED" ||
-		state == "ANALYZING_ERROR" ||
-		state == "FAILED" // this one is for backwards compatibility
+func isRunGroupDone(state string) bool {
+	return state == "failed" || state == "succeed"
 }
