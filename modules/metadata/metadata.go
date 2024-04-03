@@ -1,8 +1,8 @@
 package metadata
 
 var (
-	TracetestSource     = "tracetest.source"
-	XK6TracetestVersion = "xk6.tracetest.version"
+	tracetestSource     = "tracetest.source"
+	xK6TracetestVersion = "xk6.tracetest.version"
 )
 
 type Metadata map[string]string
@@ -19,7 +19,7 @@ func GetMetadata() Metadata {
 	// TODO: add more metadata after getting the response from the k6 team
 	// https://github.com/grafana/k6/issues/1320#issuecomment-2032734378
 	return Metadata{
-		TracetestSource:     "xk6-tracetest",
-		XK6TracetestVersion: "0.1.8",
+		tracetestSource:     "xk6-tracetest",
+		xK6TracetestVersion: "0.1.8",
 	}
 }
