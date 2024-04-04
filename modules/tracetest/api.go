@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/kubeshop/tracetest/cli/openapi"
 	"github.com/kubeshop/xk6-tracetest/models"
+	"github.com/kubeshop/xk6-tracetest/modules/metadata"
 	"sigs.k8s.io/yaml"
 )
 
@@ -192,7 +193,7 @@ func (t *Tracetest) runTest(job *models.Job) (*openapi.TestRun, error) {
 			Key:   &traceID,
 			Value: &job.TraceID,
 		}},
-		Metadata: job.Request.Metadata,
+		Metadata: job.Metadata.Merge(metadata.Metadata(job.Request.Metadata)),
 	})
 
 	run, resp, err := t.client.ApiApi.RunTestExecute(request)
