@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dop251/goja"
+	"github.com/grafana/sobek"
 	"github.com/kubeshop/xk6-tracetest/utils"
 	"go.k6.io/k6/js/modules"
 )
@@ -23,7 +23,7 @@ type HttpClientOptions struct {
 	Tracetest  TracetestOptions
 }
 
-func NewHttpClientOptions(vu modules.VU, val goja.Value) (HttpClientOptions, error) {
+func NewHttpClientOptions(vu modules.VU, val sobek.Value) (HttpClientOptions, error) {
 	rawOptions := utils.ParseOptions(vu, val)
 	options := HttpClientOptions{
 		Propagator: NewPropagator(defaultPropagatorList),

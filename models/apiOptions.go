@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/dop251/goja"
+	"github.com/grafana/sobek"
 	"github.com/kubeshop/xk6-tracetest/utils"
 	"go.k6.io/k6/js/modules"
 )
@@ -21,7 +21,7 @@ const (
 	APIToken         = "apiToken"
 )
 
-func NewApiOptions(vu modules.VU, val goja.Value) (ApiOptions, error) {
+func NewApiOptions(vu modules.VU, val sobek.Value) (ApiOptions, error) {
 	rawOptions := utils.ParseOptions(vu, val)
 	options := ApiOptions{
 		ServerUrl:  DefaultServerUrl,

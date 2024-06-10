@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/dop251/goja"
+	"github.com/grafana/sobek"
 )
 
 type TracetestOptions struct {
@@ -12,7 +12,7 @@ type TracetestOptions struct {
 	Definition   string
 }
 
-func NewTracetestOptions(runTime *goja.Runtime, params *goja.Object) TracetestOptions {
+func NewTracetestOptions(runTime *sobek.Runtime, params *sobek.Object) TracetestOptions {
 	rawOptions := params.Get("tracetest")
 	options := TracetestOptions{
 		ShouldWait:   true,
