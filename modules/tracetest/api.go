@@ -37,7 +37,6 @@ var (
 
 func NewAPIClient(options models.ApiOptions) (*openapi.APIClient, string) {
 	url, err := url.Parse(options.ServerUrl)
-
 	if err != nil {
 		panic(err)
 	}
@@ -251,7 +250,6 @@ func (t *Tracetest) waitForRunGroup(runGroupId string) (openapi.RunGroup, error)
 func (t *Tracetest) getIsRunGroupReady(ctx context.Context, runGroupId string) (*openapi.RunGroup, error) {
 	req := t.client.ApiApi.GetRunGroup(ctx, runGroupId)
 	runGroup, _, err := t.client.ApiApi.GetRunGroupExecute(req)
-
 	if err != nil {
 		return &openapi.RunGroup{}, fmt.Errorf("could not execute GetTestRun request: %w", err)
 	}

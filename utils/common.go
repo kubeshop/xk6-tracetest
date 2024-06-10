@@ -3,7 +3,7 @@ package utils
 import (
 	"math/rand"
 
-	"github.com/dop251/goja"
+	"github.com/grafana/sobek"
 	"go.k6.io/k6/js/modules"
 )
 
@@ -17,8 +17,8 @@ func RandHexStringRunes(n int) string {
 	return string(b)
 }
 
-func ParseOptions(vu modules.VU, val goja.Value) map[string]goja.Value {
-	options := make(map[string]goja.Value)
+func ParseOptions(vu modules.VU, val sobek.Value) map[string]sobek.Value {
+	options := make(map[string]sobek.Value)
 	rt := vu.Runtime()
 
 	if IsNilly(val) {
@@ -33,6 +33,6 @@ func ParseOptions(vu modules.VU, val goja.Value) map[string]goja.Value {
 	return options
 }
 
-func IsNilly(val goja.Value) bool {
-	return val == nil || goja.IsNull(val) || goja.IsUndefined(val)
+func IsNilly(val sobek.Value) bool {
+	return val == nil || sobek.IsNull(val) || sobek.IsUndefined(val)
 }

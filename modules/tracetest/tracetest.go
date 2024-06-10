@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dop251/goja"
+	"github.com/grafana/sobek"
 	"github.com/kubeshop/tracetest/cli/openapi"
 	"github.com/kubeshop/tracetest/server/pkg/id"
 	"github.com/kubeshop/xk6-tracetest/models"
@@ -68,7 +68,7 @@ func (t *Tracetest) UpdateFromConfig(config models.OutputConfig) {
 	t.client, t.jwt = NewAPIClient(apiOptions)
 }
 
-func (t *Tracetest) Constructor(call goja.ConstructorCall) *goja.Object {
+func (t *Tracetest) Constructor(call sobek.ConstructorCall) *sobek.Object {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -106,7 +106,6 @@ func (t *Tracetest) Json() string {
 
 	rt := t.Vu.Runtime()
 	jsonString, err := json.Marshal(t.jsonSummary(runGroup))
-
 	if err != nil {
 		common.Throw(rt, err)
 	}

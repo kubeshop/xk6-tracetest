@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	K6Prefix     = 0756 // Being 075 the ASCII code for 'K' :)
-	K6Code_Cloud = 12   // To ingest and process the related spans in k6 Cloud.
-	K6Code_Local = 33   // To not ingest and process the related spans, b/c they are part of a non-cloud run.
+	K6Prefix     = 0o756 // Being 075 the ASCII code for 'K' :)
+	K6Code_Cloud = 12    // To ingest and process the related spans in k6 Cloud.
+	K6Code_Local = 33    // To not ingest and process the related spans, b/c they are part of a non-cloud run.
 )
 
 type TraceID struct {
