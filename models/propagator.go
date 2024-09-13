@@ -73,11 +73,14 @@ func (p Propagator) getTextMapPropagator() propagation.TextMapPropagator {
 
 func NewSpanContext(traceID string) trace.SpanContext {
 	parsedTraceID, _ := trace.TraceIDFromHex(traceID)
+	tracestate, _ := trace.ParseTraceState("tracetest=true")
+
 	var tf trace.TraceFlags
 	return trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID:    parsedTraceID,
 		SpanID:     utils.SpanID(),
 		TraceFlags: tf.WithSampled(true),
+		TraceState: tracestate,
 		Remote:     true,
 	})
 }
